@@ -11,6 +11,13 @@
     <string name="drawer_search">Search</string>
     <string name="login_app_name">List now!</string>
     <string name="login_sign_in_google">Sign in with Google</string>
+    <string name="home_label_1">You do not have any list</string>
+    <string name="home_label_2">Let us begin!</string>
+    <string name="home_new_list">New list</string>
+    <string name="home_search">Search list</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
 </resources>
