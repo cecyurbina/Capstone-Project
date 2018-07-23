@@ -9,5 +9,8 @@
     <string name="drawer_logout">Logout</string>
     <string name="drawer_new_list">New list</string>
     <string name="drawer_search">Search</string>
+    <string name="login_app_name">List now!</string>
+    <string name="login_sign_in_google">Sign in with Google</string>
+
 
 </resources>
