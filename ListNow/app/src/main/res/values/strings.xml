@@ -2,8 +2,12 @@
     <string name="app_name">ListNow</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_title">Michael Scott</string>
+    <string name="nav_header_subtitle">michael.scott@dmifflin.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
+    <string name="drawer_logout">Logout</string>
+    <string name="drawer_new_list">New list</string>
+    <string name="drawer_search">Search</string>
+
 </resources>
