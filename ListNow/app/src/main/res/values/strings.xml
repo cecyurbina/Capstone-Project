@@ -15,6 +15,16 @@
     <string name="home_label_2">Let us begin!</string>
     <string name="home_new_list">New list</string>
     <string name="home_search">Search list</string>
+    <string name="home_item_list_img_description">Item list</string>
+    <string name="home_item_list_img_description_more">More actions</string>
+    <string name="home_list_action_empty_copy">Empty copy</string>
+    <string name="home_list_action_copy">Copy</string>
+    <string name="home_list_action_share">Share</string>
+    <string name="home_list_action_rename">Rename</string>
+    <string name="home_list_action_completed">Completed</string>
+    <string name="home_list_action_favorite">Favorite</string>
+    <string name="home_list_action_delete">Delete</string>
+
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

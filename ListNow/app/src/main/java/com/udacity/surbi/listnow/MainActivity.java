@@ -11,7 +11,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, EmptyHomeFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements
+        NavigationView.OnNavigationItemSelectedListener,
+        EmptyHomeFragment.OnFragmentInteractionListener,
+        ListHomeFragment.OnFragmentInteractionListener{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             // Create a new Fragment to be placed in the activity layout
-            EmptyHomeFragment firstFragment = new EmptyHomeFragment();
+            ListHomeFragment firstFragment = new ListHomeFragment();
 
             // In case this activity was started with special instructions from an
             // Intent, pass the Intent's extras to the fragment as arguments
