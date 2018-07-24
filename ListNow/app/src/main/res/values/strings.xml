@@ -24,6 +24,14 @@
     <string name="home_list_action_completed">Completed</string>
     <string name="home_list_action_favorite">Favorite</string>
     <string name="home_list_action_delete">Delete</string>
+    <string name="home_dialog_rename_title">Rename %s</string>
+    <string name="home_dialog_rename_new_name">Enter new name</string>
+    <string name="home_list_status_completed">Completed</string>
+    <string name="home_list_status_pending">Pending</string>
+    <string name="home_list_copy_added_to_name">copy</string>
+
+    <string name="dialog_accept">Accept</string>
+    <string name="dialog_cancel">Cancel</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->

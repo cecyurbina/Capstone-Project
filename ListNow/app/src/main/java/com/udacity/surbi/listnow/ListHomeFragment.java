@@ -1,17 +1,23 @@
 package com.udacity.surbi.listnow;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +36,13 @@ import butterknife.Unbinder;
  * create an instance of this fragment.
  */
 public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSelectedListener {
+    private static final int error_not_found = -1;
     @BindView(R.id.rv_list)
     RecyclerView rvList;
     private Unbinder unbinder;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    List<ItemList> myDataset = new ArrayList<>();
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -76,6 +84,10 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        myDataset.add(new ItemList(1, "Clothes Shopping", false, false));
+        myDataset.add(new ItemList(2, "Christmas presents", false, false));
+        myDataset.add(new ItemList(3, "Dads party", false, false));
+        myDataset.add(new ItemList(4, "Home shopping", false, false));
     }
 
     @Override
@@ -87,11 +99,7 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
         rvList.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(getContext());
         rvList.setLayoutManager(mLayoutManager);
-        List<ItemList> myDataset = new ArrayList<>();
-        myDataset.add(new ItemList("Clothes Shopping", true));
-        myDataset.add(new ItemList("Christmas presents", true));
-        myDataset.add(new ItemList("Dads party", true));
-        myDataset.add(new ItemList("Home shopping", true));
+
         mAdapter = new ListAdapter(myDataset, this);
         rvList.setAdapter(mAdapter);
 
@@ -188,9 +196,16 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     }
 
     private void onCopyMenuClicked(ItemList itemList, boolean isEmpty) {
-
+        ItemList newItemListCopied = new ItemList(myDataset.size() + 2, itemList.getTitle() + " " + getString(R.string.home_list_copy_added_to_name), false, false);
+        myDataset.add(newItemListCopied);
+        mAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * Open apps to share text
+     *
+     * @param itemList item to share
+     */
     private void onShareMenuClicked(ItemList itemList) {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
@@ -200,18 +215,112 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     }
 
     private void onRenameMenuClicked(ItemList itemList) {
-
+        showInputDialog(itemList);
     }
 
     private void onCompletedMenuClicked(ItemList itemList) {
-
+        int position = findPositionById(itemList.getId());
+        if (position != error_not_found) {
+            ItemList item = myDataset.get(position);
+            myDataset.get(position).setCompleted(!item.isCompleted());
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     private void onFavoriteMenuClicked(ItemList itemList) {
-
+        int position = findPositionById(itemList.getId());
+        if (position != error_not_found) {
+            ItemList item = myDataset.get(position);
+            myDataset.get(position).setFavorite(!item.isFavorite());
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     private void onDeleteMenuClicked(ItemList itemList) {
+        int position = findPositionById(itemList.getId());
+        if (position != error_not_found) {
+            myDataset.remove(position);
+            mAdapter.notifyItemRemoved(position);
+            mAdapter.notifyItemRangeChanged(position, myDataset.size());
+        }
+    }
 
+    /**
+     * Show dialog to enter new name
+     *
+     * @param itemList item to modify
+     */
+    private void showInputDialog(final ItemList itemList) {
+        if (getContext() != null) {
+            final Button buttonAccept;
+            final EditText etNewName = new EditText(getContext());
+            etNewName.setHint(getString(R.string.home_dialog_rename_new_name));
+
+            AlertDialog.Builder dialog = new AlertDialog.Builder(getContext()).setTitle(getString(R.string.home_dialog_rename_title, itemList.getTitle())).setView(etNewName).setPositiveButton(getString(R.string.dialog_accept), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    itemList.setTitle(etNewName.getText().toString());
+                    updateListNewTitle(itemList);
+                }
+            }).setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                }
+            });
+            buttonAccept = dialog.show().getButton(AlertDialog.BUTTON_POSITIVE);
+            //disable accept if input is empty
+            buttonAccept.setEnabled(false);
+
+            //validate empty list name
+            etNewName.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    //enable button if input is not empty
+                    if (etNewName.getText().length() > 0) {
+                        buttonAccept.setEnabled(true);
+                    } else {
+                        buttonAccept.setEnabled(false);
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            });
+        }
+    }
+
+    /**
+     * Update list in view after list item is renamed
+     *
+     * @param itemList item modified
+     */
+    private void updateListNewTitle(ItemList itemList) {
+        for (ItemList il : myDataset) {
+            if (il.getId() == itemList.getId()) {
+                il.setTitle(itemList.getTitle());
+                break;
+            }
+        }
+        mAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * find element position by id
+     *
+     * @param id element to find
+     * @return position
+     */
+    private int findPositionById(int id) {
+        int positionToRemove;
+        for (int i = 0; i < myDataset.size(); i++) {
+            if (myDataset.get(i).getId() == id) {
+                return i;
+            }
+        }
+        return error_not_found;
     }
 }
