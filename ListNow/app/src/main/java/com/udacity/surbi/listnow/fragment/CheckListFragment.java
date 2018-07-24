@@ -1,4 +1,4 @@
-package com.udacity.surbi.listnow;
+package com.udacity.surbi.listnow.fragment;
 
 import android.content.Context;
 import android.net.Uri;
@@ -8,16 +8,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.udacity.surbi.listnow.R;
+
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link EmptyHomeFragment.OnFragmentInteractionListener} interface
+ * {@link CheckListFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link EmptyHomeFragment#newInstance} factory method to
+ * Use the {@link CheckListFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class EmptyHomeFragment extends Fragment {
+public class CheckListFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -29,7 +31,7 @@ public class EmptyHomeFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    public EmptyHomeFragment() {
+    public CheckListFragment() {
         // Required empty public constructor
     }
 
@@ -39,11 +41,11 @@ public class EmptyHomeFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment EmptyHomeFragment.
+     * @return A new instance of fragment CheckListFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static EmptyHomeFragment newInstance(String param1, String param2) {
-        EmptyHomeFragment fragment = new EmptyHomeFragment();
+    public static CheckListFragment newInstance(String param1, String param2) {
+        CheckListFragment fragment = new CheckListFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -63,7 +65,7 @@ public class EmptyHomeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_empty_home, container, false);
+        return inflater.inflate(R.layout.fragment_check_list, container, false);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

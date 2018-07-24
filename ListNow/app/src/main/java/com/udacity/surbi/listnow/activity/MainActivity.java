@@ -1,4 +1,4 @@
-package com.udacity.surbi.listnow;
+package com.udacity.surbi.listnow.activity;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,10 +11,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.udacity.surbi.listnow.fragment.EmptyHomeFragment;
+import com.udacity.surbi.listnow.fragment.ListHomeFragment;
+import com.udacity.surbi.listnow.R;
+
 public class MainActivity extends AppCompatActivity implements
-        NavigationView.OnNavigationItemSelectedListener,
-        EmptyHomeFragment.OnFragmentInteractionListener,
-        ListHomeFragment.OnFragmentInteractionListener{
+        NavigationView.OnNavigationItemSelectedListener, EmptyHomeFragment.OnFragmentInteractionListener, ListHomeFragment.OnFragmentInteractionListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

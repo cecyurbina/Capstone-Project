@@ -1,4 +1,4 @@
-package com.udacity.surbi.listnow;
+package com.udacity.surbi.listnow.fragment;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -18,6 +18,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+
+import com.udacity.surbi.listnow.activity.CheckListContainerActivity;
+import com.udacity.surbi.listnow.R;
+import com.udacity.surbi.listnow.adapter.ListAdapter;
+import com.udacity.surbi.listnow.data.ItemList;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.udacity.surbi.listnow;
+package com.udacity.surbi.listnow.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -9,6 +9,9 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.udacity.surbi.listnow.data.ItemList;
+import com.udacity.surbi.listnow.R;
 
 import java.util.List;
 

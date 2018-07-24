@@ -1,7 +1,9 @@
-package com.udacity.surbi.listnow;
+package com.udacity.surbi.listnow.activity;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.udacity.surbi.listnow.R;
 
 public class LoginActivity extends AppCompatActivity {
 

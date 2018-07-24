@@ -1,4 +1,4 @@
-package com.udacity.surbi.listnow;
+package com.udacity.surbi.listnow.data;
 
 public class ItemList {
     private int id;
