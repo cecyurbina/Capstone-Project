@@ -19,10 +19,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.udacity.surbi.listnow.activity.CheckListContainerActivity;
 import com.udacity.surbi.listnow.R;
 import com.udacity.surbi.listnow.adapter.ListAdapter;
+import com.udacity.surbi.listnow.data.Item;
 import com.udacity.surbi.listnow.data.ItemList;
+import com.udacity.surbi.listnow.data.ListStructure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +45,7 @@ import butterknife.Unbinder;
  * create an instance of this fragment.
  */
 public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSelectedListener {
+    public static final String KEY_LIST_JSON = "key_list_json";
     private static final int error_not_found = -1;
     @BindView(R.id.rv_list)
     RecyclerView rvList;
@@ -142,8 +147,15 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
 
     @Override
     public void onSelectedItem(ItemList itemList) {
-        Intent intent = new Intent(getContext(), CheckListContainerActivity.class);
-        startActivity(intent);
+        try {
+            String jsonList = getJsonList();
+            Intent intent = new Intent(getContext(), CheckListContainerActivity.class);
+            intent.putExtra(KEY_LIST_JSON, jsonList);
+            startActivity(intent);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -327,5 +339,40 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
             }
         }
         return error_not_found;
+    }
+
+    private String getJsonList() throws JsonProcessingException {
+        ListStructure listStructure = new ListStructure();
+        listStructure.setId(1);
+        listStructure.setCompleted(false);
+        listStructure.setFavorite(false);
+
+        List<Item> items = new ArrayList<>();
+
+        Item item1 = new Item();
+        item1.setImage(true);
+        item1.setName("Shampoo");
+        item1.setQuantity(2);
+        item1.setUnit("botes");
+
+        Item item2 = new Item();
+        item2.setImage(true);
+        item2.setName("Jabon");
+        item2.setQuantity(2);
+        item2.setUnit("barras");
+
+        Item item3 = new Item();
+        item3.setImage(true);
+        item3.setName("Pasta dental");
+
+        items.add(item1);
+        items.add(item2);
+        items.add(item3);
+
+        listStructure.setItems(items);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonInString = mapper.writeValueAsString(listStructure);
+        return jsonInString;
     }
 }

@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class Item {
 
     @JsonProperty("name")
-    private Integer name;
+    private String name;
     @JsonProperty("image")
     private Boolean image;
     @JsonProperty("unit")
@@ -33,12 +33,12 @@ public class Item {
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("name")
-    public Integer getName() {
+    public String getName() {
         return name;
     }
 
     @JsonProperty("name")
-    public void setName(Integer name) {
+    public void setName(String name) {
         this.name = name;
     }
 

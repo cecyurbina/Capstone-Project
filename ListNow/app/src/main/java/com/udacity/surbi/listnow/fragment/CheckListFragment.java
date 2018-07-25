@@ -4,11 +4,27 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.udacity.surbi.listnow.R;
+import com.udacity.surbi.listnow.adapter.CheckListAdapter;
+import com.udacity.surbi.listnow.adapter.ListAdapter;
+import com.udacity.surbi.listnow.data.Item;
+import com.udacity.surbi.listnow.data.ItemList;
+import com.udacity.surbi.listnow.data.ListStructure;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 
 /**
@@ -24,6 +40,13 @@ public class CheckListFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private ListStructure listStructure;
+    @BindView(R.id.rv_list)
+    RecyclerView rvList;
+    private Unbinder unbinder;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+    List<Item> myDataset = new ArrayList<>();
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -60,12 +83,30 @@ public class CheckListFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            if (mListener != null) {
+                listStructure = mapper.readValue(mListener.getList(), ListStructure.class);
+                myDataset = listStructure.getItems();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_check_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_check_list, container, false);
+        unbinder = ButterKnife.bind(this, view);
+        rvList.setHasFixedSize(true);
+        mLayoutManager = new LinearLayoutManager(getContext());
+        rvList.setLayoutManager(mLayoutManager);
+
+        mAdapter = new CheckListAdapter(myDataset);
+        rvList.setAdapter(mAdapter);
+
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -104,5 +145,6 @@ public class CheckListFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+        String getList();
     }
 }
