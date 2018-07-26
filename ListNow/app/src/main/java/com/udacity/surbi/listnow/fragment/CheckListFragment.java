@@ -16,10 +16,8 @@ import android.view.ViewGroup;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.udacity.surbi.listnow.R;
 import com.udacity.surbi.listnow.adapter.CheckListAdapter;
-import com.udacity.surbi.listnow.adapter.ListAdapter;
 import com.udacity.surbi.listnow.adapter.PreviewListListener;
 import com.udacity.surbi.listnow.data.Item;
-import com.udacity.surbi.listnow.data.ItemList;
 import com.udacity.surbi.listnow.data.ListStructure;
 
 import java.io.IOException;

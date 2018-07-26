@@ -1,5 +1,7 @@
 package com.udacity.surbi.listnow.activity;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -7,15 +9,20 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.udacity.surbi.listnow.fragment.EmptyHomeFragment;
 import com.udacity.surbi.listnow.fragment.ListHomeFragment;
 import com.udacity.surbi.listnow.R;
-import com.udacity.surbi.listnow.fragment.NewListFragment;
 
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener, EmptyHomeFragment.OnFragmentInteractionListener, ListHomeFragment.OnFragmentInteractionListener {
@@ -102,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements
                 startActivity(intent);
                 break;
             case R.id.nav_search:
+                showSearchDialog();
                 break;
             case R.id.nav_logout:
                 break;
@@ -114,5 +122,58 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+    }
+
+    /**
+     * Show dialog to enter new name
+     */
+    private void showSearchDialog() {
+        if (getApplicationContext() != null) {
+            final Button buttonAccept;
+            final EditText etNewName = new EditText(getApplicationContext());
+            etNewName.setHint(getString(R.string.action_search_id));
+
+            AlertDialog.Builder dialog = new AlertDialog.Builder(getApplicationContext()).setTitle(getString(R.string.dialog_search_title)).setView(etNewName).setPositiveButton(getString(R.string.accept), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    showToast(true);
+                }
+            }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                }
+            });
+            buttonAccept = dialog.show().getButton(AlertDialog.BUTTON_POSITIVE);
+            //disable accept if input is empty
+            buttonAccept.setEnabled(false);
+
+            //validate empty list name
+            etNewName.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    //enable button if input is not empty
+                    if (etNewName.getText().length() > 0) {
+                        buttonAccept.setEnabled(true);
+                    } else {
+                        buttonAccept.setEnabled(false);
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            });
+        }
+    }
+
+    private void showToast(boolean success){
+        String message = (success) ? getApplicationContext().getString(R.string.search_success) : getApplicationContext().getString(R.string.search_fail);
+        Context context = getApplicationContext();
+        int duration = Toast.LENGTH_SHORT;
+        Toast toast = Toast.makeText(context, message, duration);
+        toast.show();
     }
 }

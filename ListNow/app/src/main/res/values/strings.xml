@@ -40,6 +40,12 @@
     <string name="new_item_unit">Unit</string>
     <string name="new_item_image_required">Image required</string>
 
+    <string name="action_search_id">Enter list id</string>
+    <string name="dialog_search_title">Search</string>
+    <string name="search_success">List added successfully</string>
+    <string name="search_fail">List not found</string>
+
+
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
 
