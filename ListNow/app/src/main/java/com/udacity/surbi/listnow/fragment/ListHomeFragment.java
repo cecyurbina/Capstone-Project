@@ -273,12 +273,12 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
             final EditText etNewName = new EditText(getContext());
             etNewName.setHint(getString(R.string.home_dialog_rename_new_name));
 
-            AlertDialog.Builder dialog = new AlertDialog.Builder(getContext()).setTitle(getString(R.string.home_dialog_rename_title, itemList.getTitle())).setView(etNewName).setPositiveButton(getString(R.string.dialog_accept), new DialogInterface.OnClickListener() {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(getContext()).setTitle(getString(R.string.home_dialog_rename_title, itemList.getTitle())).setView(etNewName).setPositiveButton(getString(R.string.accept), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     itemList.setTitle(etNewName.getText().toString());
                     updateListNewTitle(itemList);
                 }
-            }).setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
+            }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                 }
             });
