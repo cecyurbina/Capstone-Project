@@ -1,5 +1,6 @@
 package com.udacity.surbi.listnow.activity;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,7 +10,6 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -128,12 +128,12 @@ public class MainActivity extends AppCompatActivity implements
      * Show dialog to enter new name
      */
     private void showSearchDialog() {
-        if (getApplicationContext() != null) {
+        if (MainActivity.this != null) {
             final Button buttonAccept;
-            final EditText etNewName = new EditText(getApplicationContext());
+            final EditText etNewName = new EditText(MainActivity.this);
             etNewName.setHint(getString(R.string.action_search_id));
 
-            AlertDialog.Builder dialog = new AlertDialog.Builder(getApplicationContext()).setTitle(getString(R.string.dialog_search_title)).setView(etNewName).setPositiveButton(getString(R.string.accept), new DialogInterface.OnClickListener() {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this).setTitle(getString(R.string.dialog_search_title)).setView(etNewName).setPositiveButton(getString(R.string.accept), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     showToast(true);
                 }
