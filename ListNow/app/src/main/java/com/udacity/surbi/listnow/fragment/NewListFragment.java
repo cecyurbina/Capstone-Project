@@ -92,7 +92,7 @@ public class NewListFragment extends Fragment implements PreviewListListener{
         View view =  inflater.inflate(R.layout.fragment_new_list, container, false);
         unbinder = ButterKnife.bind(this, view);
 
-        if (false){
+        if (true){
             listStructure = getJsonList();
             myDataset = listStructure.getItems();
         }
