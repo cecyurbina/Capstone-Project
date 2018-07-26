@@ -34,6 +34,7 @@
     <string name="check_list_action_edit">Edit</string>
     <string name="check_list_action_reject">Reject</string>
 
+    <string name="new_list_empty">Add items to the list</string>
 
     <string name="dialog_accept">Accept</string>
     <string name="dialog_cancel">Cancel</string>

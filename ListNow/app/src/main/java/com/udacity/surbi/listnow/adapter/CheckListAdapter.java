@@ -19,7 +19,7 @@ import butterknife.ButterKnife;
 
 public class CheckListAdapter extends RecyclerView.Adapter<CheckListAdapter.ViewHolder> {
     private List<Item> mDataset;
-    private OnItemSelectedListener listener;
+    private PreviewListListener listener;
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.cl_item_check_list)
@@ -44,7 +44,7 @@ public class CheckListAdapter extends RecyclerView.Adapter<CheckListAdapter.View
         }
     }
 
-    public CheckListAdapter(List<Item> myDataset, OnItemSelectedListener onItemSelectedListener) {
+    public CheckListAdapter(List<Item> myDataset, PreviewListListener onItemSelectedListener) {
         mDataset = myDataset;
         listener = onItemSelectedListener;
     }
@@ -109,7 +109,5 @@ public class CheckListAdapter extends RecyclerView.Adapter<CheckListAdapter.View
         return mDataset.size();
     }
 
-    public interface OnItemSelectedListener {
-        void onSelectedItem(Item item, View view);
-    }
+
 }

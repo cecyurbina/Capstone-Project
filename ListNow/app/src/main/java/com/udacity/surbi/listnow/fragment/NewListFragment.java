@@ -4,11 +4,28 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.udacity.surbi.listnow.R;
+import com.udacity.surbi.listnow.adapter.CheckListAdapter;
+import com.udacity.surbi.listnow.adapter.PreviewListListener;
+import com.udacity.surbi.listnow.data.Item;
+import com.udacity.surbi.listnow.data.ListStructure;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
+import static android.view.View.GONE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -18,12 +35,20 @@ import com.udacity.surbi.listnow.R;
  * Use the {@link NewListFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class NewListFragment extends Fragment {
+public class NewListFragment extends Fragment implements PreviewListListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
+    private ListStructure listStructure ;
+    @BindView(R.id.tv_empty_message)
+    TextView tvMessage;
+    @BindView(R.id.rv_structure_list)
+    RecyclerView rvList;
+    private Unbinder unbinder;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+    List<Item> myDataset = new ArrayList<>();
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
@@ -64,7 +89,28 @@ public class NewListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_new_list, container, false);
+        View view =  inflater.inflate(R.layout.fragment_new_list, container, false);
+        unbinder = ButterKnife.bind(this, view);
+
+        if (false){
+            listStructure = getJsonList();
+            myDataset = listStructure.getItems();
+        }
+        if (myDataset.size() > 0){
+            tvMessage.setVisibility(GONE);
+            rvList.setVisibility(View.VISIBLE);
+            rvList.setHasFixedSize(true);
+            mLayoutManager = new LinearLayoutManager(getContext());
+            rvList.setLayoutManager(mLayoutManager);
+            rvList.addItemDecoration(new DividerItemDecoration(rvList.getContext(), DividerItemDecoration.VERTICAL));
+
+            mAdapter = new CheckListAdapter(myDataset, this);
+            rvList.setAdapter(mAdapter);
+        } else {
+            tvMessage.setVisibility(View.VISIBLE);
+            rvList.setVisibility(View.GONE);
+        }
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -90,6 +136,11 @@ public class NewListFragment extends Fragment {
         mListener = null;
     }
 
+    @Override
+    public void onSelectedItem(Item item, View view) {
+
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -104,4 +155,47 @@ public class NewListFragment extends Fragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
+
+    private ListStructure getJsonList()  {
+        ListStructure listStructure = new ListStructure();
+        listStructure.setId(1);
+        listStructure.setCompleted(false);
+        listStructure.setFavorite(false);
+
+        List<Item> items = new ArrayList<>();
+
+        Item item1 = new Item();
+        item1.setImage(false);
+        item1.setName("Shampoo");
+        item1.setQuantity(2);
+        item1.setUnit("botes");
+        item1.setRejected(true);
+
+        Item item2 = new Item();
+        item2.setImage(true);
+        item2.setName("Jabon");
+        item2.setQuantity(2);
+        item2.setUnit("barras");
+        item2.setRejected(true);
+
+        Item item3 = new Item();
+        item3.setImage(true);
+        item3.setName("Pasta dental");
+        item3.setRejected(false);
+
+        items.add(item1);
+        items.add(item2);
+        items.add(item3);
+
+        listStructure.setItems(items);
+
+        return listStructure;
+    }
+
 }

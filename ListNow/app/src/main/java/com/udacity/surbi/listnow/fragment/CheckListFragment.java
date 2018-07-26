@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.udacity.surbi.listnow.R;
 import com.udacity.surbi.listnow.adapter.CheckListAdapter;
 import com.udacity.surbi.listnow.adapter.ListAdapter;
+import com.udacity.surbi.listnow.adapter.PreviewListListener;
 import com.udacity.surbi.listnow.data.Item;
 import com.udacity.surbi.listnow.data.ItemList;
 import com.udacity.surbi.listnow.data.ListStructure;
@@ -38,7 +39,7 @@ import butterknife.Unbinder;
  * Use the {@link CheckListFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CheckListFragment extends Fragment implements CheckListAdapter.OnItemSelectedListener {
+public class CheckListFragment extends Fragment implements PreviewListListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -183,4 +184,11 @@ public class CheckListFragment extends Fragment implements CheckListAdapter.OnIt
 
         String getList();
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
+
 }
