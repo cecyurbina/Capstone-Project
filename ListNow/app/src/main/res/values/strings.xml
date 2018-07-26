@@ -30,6 +30,11 @@
     <string name="home_list_status_pending">Pending</string>
     <string name="home_list_copy_added_to_name">copy</string>
 
+    <string name="check_list_reject">Rejected! Please choose another</string>
+    <string name="check_list_action_edit">Edit</string>
+    <string name="check_list_action_reject">Reject</string>
+
+
     <string name="dialog_accept">Accept</string>
     <string name="dialog_cancel">Cancel</string>
 

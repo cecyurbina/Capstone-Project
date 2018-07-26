@@ -350,20 +350,23 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
         List<Item> items = new ArrayList<>();
 
         Item item1 = new Item();
-        item1.setImage(true);
+        item1.setImage(false);
         item1.setName("Shampoo");
         item1.setQuantity(2);
         item1.setUnit("botes");
+        item1.setRejected(true);
 
         Item item2 = new Item();
         item2.setImage(true);
         item2.setName("Jabon");
         item2.setQuantity(2);
         item2.setUnit("barras");
+        item2.setRejected(true);
 
         Item item3 = new Item();
         item3.setImage(true);
         item3.setName("Pasta dental");
+        item3.setRejected(false);
 
         items.add(item1);
         items.add(item2);

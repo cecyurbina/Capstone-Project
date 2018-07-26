@@ -6,8 +6,10 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -36,7 +38,7 @@ import butterknife.Unbinder;
  * Use the {@link CheckListFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CheckListFragment extends Fragment {
+public class CheckListFragment extends Fragment implements CheckListAdapter.OnItemSelectedListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -105,7 +107,7 @@ public class CheckListFragment extends Fragment {
         rvList.setLayoutManager(mLayoutManager);
         rvList.addItemDecoration(new DividerItemDecoration(rvList.getContext(), DividerItemDecoration.VERTICAL));
 
-        mAdapter = new CheckListAdapter(myDataset);
+        mAdapter = new CheckListAdapter(myDataset, this);
         rvList.setAdapter(mAdapter);
 
         return view;
@@ -132,6 +134,37 @@ public class CheckListFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onSelectedItem(Item item, View view) {
+        if (getContext() == null) {
+            return;
+        }
+        PopupMenu popup = new PopupMenu(getContext(), view);
+        popup.inflate(R.menu.check_list_actions);
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.list_edit:
+                        onListEditClicked(item);
+                        break;
+                    case R.id.list_reject:
+                        onListRejectClicked(item);
+                        break;
+
+                }
+                return false;
+            }
+        });
+        popup.show();
+    }
+
+    private void onListRejectClicked(MenuItem item) {
+    }
+
+    private void onListEditClicked(MenuItem item) {
     }
 
     /**

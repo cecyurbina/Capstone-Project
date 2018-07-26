@@ -5,24 +5,29 @@
     android:id="@+id/cl_item_check_list"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="10dp">
+    android:layout_margin="8dp">
 
     <TextView
         android:id="@+id/tv_name"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textSize="16sp"
+        android:textStyle="bold"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:layout_marginStart="16dp"
-        android:ellipsize="end"
-        android:maxLines="1"
+        android:layout_marginTop="8dp"
         android:text="@string/home_search"
-        android:textSize="16sp"
-        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
-
+    <android.support.constraint.Barrier
+        android:id="@+id/barrier2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="tv_quantity,tv_unit" />
     <TextView
         android:id="@+id/tv_quantity"
         android:layout_width="wrap_content"
@@ -41,25 +46,31 @@
         android:text="@string/home_search"
         app:layout_constraintStart_toEndOf="@+id/tv_quantity"
         app:layout_constraintTop_toBottomOf="@+id/tv_name" />
-
+    <android.support.constraint.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="end"
+        app:constraint_referenced_ids="iv_upload_image" />
     <ImageView
         android:id="@+id/iv_upload_image"
         android:layout_width="40dp"
         android:layout_height="40dp"
+        android:padding="3dp"
         android:src="@drawable/ic_launcher_background"
         app:layout_constraintStart_toStartOf="@+id/tv_name"
-        app:layout_constraintTop_toBottomOf="@+id/tv_quantity" />
+        app:layout_constraintTop_toBottomOf="@+id/barrier2" />
 
     <TextView
         android:id="@+id/tv_reject"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_height="17dp"
+        android:layout_marginBottom="8dp"
         android:layout_marginTop="3dp"
         android:text="@string/home_search"
-        app:layout_constraintBottom_toBottomOf="@+id/iv_upload_image"
-        app:layout_constraintStart_toEndOf="@+id/iv_upload_image"
-        app:layout_constraintTop_toBottomOf="@+id/tv_unit" />
+        app:layout_constraintBottom_toBottomOf="@+id/barrier"
+        app:layout_constraintStart_toEndOf="@+id/barrier"
+        app:layout_constraintTop_toBottomOf="@+id/barrier2" />
 
     <CheckBox
         android:id="@+id/checkBox"
