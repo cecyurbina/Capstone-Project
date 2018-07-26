@@ -1,5 +1,6 @@
 package com.udacity.surbi.listnow.activity;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -14,6 +15,7 @@ import android.view.MenuItem;
 import com.udacity.surbi.listnow.fragment.EmptyHomeFragment;
 import com.udacity.surbi.listnow.fragment.ListHomeFragment;
 import com.udacity.surbi.listnow.R;
+import com.udacity.surbi.listnow.fragment.NewListFragment;
 
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener, EmptyHomeFragment.OnFragmentInteractionListener, ListHomeFragment.OnFragmentInteractionListener {
@@ -96,6 +98,8 @@ public class MainActivity extends AppCompatActivity implements
         int id = item.getItemId();
         switch (id){
             case R.id.nav_new_list:
+                Intent intent = new Intent(getApplicationContext(), NewListActivity.class);
+                startActivity(intent);
                 break;
             case R.id.nav_search:
                 break;

@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import com.udacity.surbi.listnow.R;
 import com.udacity.surbi.listnow.data.Item;
-import com.udacity.surbi.listnow.data.ItemList;
 
 import java.util.List;
 

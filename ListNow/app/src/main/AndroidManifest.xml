@@ -24,6 +24,15 @@
         <activity
             android:name=".activity.CheckListContainerActivity"
             android:parentActivityName=".activity.MainActivity" />
+        <activity
+            android:name=".activity.NewListActivity"
+            android:label="@string/title_activity_new_list"
+            android:parentActivityName=".activity.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.udacity.surbi.listnow.activity.MainActivity" />
+        </activity>
     </application>
 
 </manifest>
