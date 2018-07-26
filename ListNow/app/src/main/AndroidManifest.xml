@@ -33,6 +33,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.udacity.surbi.listnow.activity.MainActivity" />
         </activity>
+        <activity
+            android:name=".activity.NewItemActivity"
+            android:label="@string/title_activity_new_item"
+            android:parentActivityName=".activity.NewListActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.udacity.surbi.listnow.activity.NewListActivity" />
+        </activity>
     </application>
 
 </manifest>

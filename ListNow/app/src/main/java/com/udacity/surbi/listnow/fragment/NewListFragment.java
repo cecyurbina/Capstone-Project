@@ -1,6 +1,7 @@
 package com.udacity.surbi.listnow.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -15,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.udacity.surbi.listnow.R;
+import com.udacity.surbi.listnow.activity.NewItemActivity;
 import com.udacity.surbi.listnow.adapter.CheckListAdapter;
 import com.udacity.surbi.listnow.adapter.PreviewListListener;
 import com.udacity.surbi.listnow.data.Item;
@@ -118,7 +120,8 @@ public class NewListFragment extends Fragment implements PreviewListListener{
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+            Intent intent = new Intent(getContext(), NewItemActivity.class);
+            startActivity(intent);
             }
         });
         return view;
