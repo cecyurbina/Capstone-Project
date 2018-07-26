@@ -3,6 +3,8 @@ package com.udacity.surbi.listnow.fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -45,6 +47,8 @@ public class NewListFragment extends Fragment implements PreviewListListener{
     TextView tvMessage;
     @BindView(R.id.rv_structure_list)
     RecyclerView rvList;
+    @BindView(R.id.floating_action_button)
+    FloatingActionButton floatingActionButton;
     private Unbinder unbinder;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -110,6 +114,13 @@ public class NewListFragment extends Fragment implements PreviewListListener{
             tvMessage.setVisibility(View.VISIBLE);
             rvList.setVisibility(View.GONE);
         }
+
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
         return view;
     }
 
