@@ -1,5 +1,6 @@
 package com.udacity.surbi.listnow.fragment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,16 +13,20 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.udacity.surbi.listnow.R;
 import com.udacity.surbi.listnow.activity.NewItemActivity;
 import com.udacity.surbi.listnow.adapter.CheckListAdapter;
@@ -31,6 +36,7 @@ import com.udacity.surbi.listnow.data.ItemList;
 import com.udacity.surbi.listnow.data.ListStructure;
 import com.udacity.surbi.listnow.utils.DatabaseHelper;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +56,11 @@ import static android.view.View.GONE;
  */
 public class NewListFragment extends Fragment implements PreviewListListener{
     public static final String KEY_LIST_ID = "key_list_id";
+    public static final int CODE_RESULT = 100;
+    public static final String KEY_RESULT_ITEM = "key_result_item";
+    private static final int error_not_found = -1;
+
+
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -70,6 +81,7 @@ public class NewListFragment extends Fragment implements PreviewListListener{
     private String mParam1;
     private String mParam2;
     private String key;
+    DatabaseHelper databaseHelper = new DatabaseHelper();
 
     private OnFragmentInteractionListener mListener;
 
@@ -98,13 +110,13 @@ public class NewListFragment extends Fragment implements PreviewListListener{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setRetainInstance(true);
-        if (savedInstanceState == null) {
-            DatabaseHelper databaseHelper = new DatabaseHelper();
+        setRetainInstance(true);
+        //if (savedInstanceState == null) {
+        //    DatabaseHelper databaseHelper = new DatabaseHelper();
             key = databaseHelper.createList();
-        } else {
-            key = savedInstanceState.getString(KEY_LIST_ID);
-        }
+        //} else {
+        //    key = savedInstanceState.getString(KEY_LIST_ID);
+        //}
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -117,36 +129,42 @@ public class NewListFragment extends Fragment implements PreviewListListener{
         View view =  inflater.inflate(R.layout.fragment_new_list, container, false);
         unbinder = ButterKnife.bind(this, view);
 
-        if (true){
+        if (false){
             listStructure = getJsonList();
             myDataset = listStructure.getItems();
         }
-        if (myDataset.size() > 0){
-            tvMessage.setVisibility(GONE);
-            rvList.setVisibility(View.VISIBLE);
-            rvList.setHasFixedSize(true);
-            mLayoutManager = new LinearLayoutManager(getContext());
-            rvList.setLayoutManager(mLayoutManager);
-            rvList.addItemDecoration(new DividerItemDecoration(rvList.getContext(), DividerItemDecoration.VERTICAL));
+        mLayoutManager = new LinearLayoutManager(getContext());
+        rvList.setLayoutManager(mLayoutManager);
+        rvList.addItemDecoration(new DividerItemDecoration(rvList.getContext(), DividerItemDecoration.VERTICAL));
 
-            mAdapter = new CheckListAdapter(myDataset, this);
-            rvList.setAdapter(mAdapter);
-        } else {
-            tvMessage.setVisibility(View.VISIBLE);
-            rvList.setVisibility(View.GONE);
-        }
+        mAdapter = new CheckListAdapter(myDataset, this);
+        rvList.setAdapter(mAdapter);
+
+        showData();
 
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
             Intent intent = new Intent(getContext(), NewItemActivity.class);
             intent.putExtra(KEY_LIST_ID, key);
-            startActivity(intent);
+            startActivityForResult(intent, CODE_RESULT);
             }
         });
         return view;
     }
 
+    private void showData(){
+        if (myDataset.size() > 0) {
+
+            tvMessage.setVisibility(GONE);
+            rvList.setVisibility(View.VISIBLE);
+            rvList.setHasFixedSize(true);
+
+        } else {
+            tvMessage.setVisibility(View.VISIBLE);
+            rvList.setVisibility(View.GONE);
+        }
+    }
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
@@ -171,10 +189,51 @@ public class NewListFragment extends Fragment implements PreviewListListener{
     }
 
     @Override
-    public void onSelectedItem(Item item, View view) {
+    public void onSelectedItem(final Item itemList, View view) {
+        if (getContext() == null) {
+            return;
+        }
+        PopupMenu popup = new PopupMenu(getContext(), view);
+        popup.inflate(R.menu.check_list_actions);
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.list_edit:
+                        onListEditClicked(itemList);
+                        break;
+                    case R.id.list_reject:
+                        onListRejectClicked(itemList);
+                        break;
+                    case R.id.list_delete:
+                        onListDeleteClicked(itemList);
+                        break;
 
+                }
+                return false;
+            }
+        });
+        popup.show();
     }
 
+    private void onListRejectClicked(Item item) {
+        item.setRejected(true);
+        databaseHelper.rejectItemFromList(key, item.getKey());
+        mAdapter.notifyDataSetChanged();
+    }
+
+    private void onListEditClicked(Item item) {
+    }
+
+    private void onListDeleteClicked(Item item) {
+        databaseHelper.removeItemFromList(key, item.getKey());
+        int positionToDelete = findPositionById(item.getKey());
+        if (positionToDelete != error_not_found) {
+            myDataset.remove(positionToDelete);
+            mAdapter.notifyItemRemoved(positionToDelete);
+            mAdapter.notifyItemRangeChanged(positionToDelete, myDataset.size());
+        }
+    }
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -247,5 +306,41 @@ public class NewListFragment extends Fragment implements PreviewListListener{
         outState.putString(KEY_LIST_ID, key);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CODE_RESULT) {
+            if(resultCode == Activity.RESULT_OK){
+                String result=data.getStringExtra(KEY_RESULT_ITEM);
+                ObjectMapper mapper = new ObjectMapper();
+                try {
+                    Item obj = mapper.readValue(result, Item.class);
+                    myDataset.add(obj);
+                    showData();
+                    mAdapter.notifyDataSetChanged();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                //Write your code if there's no result
+            }
+        }
+    }//onActivityResult
 
+
+    /**
+     * find element position by id
+     *
+     * @param id element to find
+     * @return position
+     */
+    private int findPositionById(String id) {
+        for (int i = 0; i < myDataset.size(); i++) {
+            if (myDataset.get(i).getKey().equals(id)) {
+                return i;
+            }
+        }
+        return error_not_found;
+    }
 }

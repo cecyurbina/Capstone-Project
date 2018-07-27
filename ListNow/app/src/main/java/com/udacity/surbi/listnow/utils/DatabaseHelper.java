@@ -7,6 +7,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.udacity.surbi.listnow.data.Item;
 import com.udacity.surbi.listnow.data.ListStructure;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class DatabaseHelper {
     private DatabaseReference mDatabase;
 
@@ -36,15 +39,18 @@ public class DatabaseHelper {
 
     }
 
-    public void addItemToList(String idList){
+    public void addItemToList(String idList, Item item){
         String key = mDatabase.child("items").push().getKey();
-        Item item = new Item();
-        item.setName("Test");
-        item.setRejected(false);
-        item.setImage(false);
-        item.setQuantity(1);
+        item.setKey(key);
         mDatabase.child("lists").child(idList).child("items").child(key).setValue(item);
+    }
 
+    public void removeItemFromList(String idList, String idItem){
+        mDatabase.child("lists").child(idList).child("items").child(idItem).removeValue();
+    }
+
+    public void rejectItemFromList(String idList, String idItem){
+        mDatabase.child("lists").child(idList).child("items").child(idItem).child("rejected").setValue(true);
     }
 
     public void updateItem(){

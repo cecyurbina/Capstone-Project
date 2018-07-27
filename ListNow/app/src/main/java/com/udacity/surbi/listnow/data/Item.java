@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
+        "key",
         "name",
         "image",
         "unit",
@@ -19,7 +20,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
         "rejected"
 })
 public class Item {
-
+    @JsonProperty("key")
+    private String key;
     @JsonProperty("name")
     private String name;
     @JsonProperty("image")
@@ -34,6 +36,16 @@ public class Item {
     private Boolean rejected;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+
+    @JsonProperty("key")
+    public String getKey() {
+        return key;
+    }
+
+    @JsonProperty("key")
+    public void setKey(String key) {
+        this.key = key;
+    }
 
     @JsonProperty("name")
     public String getName() {

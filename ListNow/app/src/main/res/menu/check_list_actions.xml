@@ -6,4 +6,7 @@
     <item
         android:id="@+id/list_reject"
         android:title="@string/check_list_action_reject" />
+    <item
+        android:id="@+id/list_delete"
+        android:title="@string/check_list_action_delete" />
 </menu>
