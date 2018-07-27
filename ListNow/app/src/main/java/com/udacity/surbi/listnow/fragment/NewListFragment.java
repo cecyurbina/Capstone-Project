@@ -2,27 +2,19 @@ package com.udacity.surbi.listnow.fragment;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -32,7 +24,6 @@ import com.udacity.surbi.listnow.activity.NewItemActivity;
 import com.udacity.surbi.listnow.adapter.CheckListAdapter;
 import com.udacity.surbi.listnow.adapter.PreviewListListener;
 import com.udacity.surbi.listnow.data.Item;
-import com.udacity.surbi.listnow.data.ItemList;
 import com.udacity.surbi.listnow.data.ListStructure;
 import com.udacity.surbi.listnow.utils.DatabaseHelper;
 
@@ -54,19 +45,23 @@ import static android.view.View.GONE;
  * Use the {@link NewListFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class NewListFragment extends Fragment implements PreviewListListener{
+public class NewListFragment extends Fragment implements PreviewListListener {
     public static final String KEY_LIST_ID = "key_list_id";
-    public static final int CODE_RESULT = 100;
+    public static final String KEY_ITEM = "key_item";
+    public static final String KEY_EDITION = "key_edition";
+
+
+    public static final int CODE_RESULT_NEW = 100;
+    public static final int CODE_RESULT_EDIT = 101;
     public static final String KEY_RESULT_ITEM = "key_result_item";
     private static final int error_not_found = -1;
-
 
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    private ListStructure listStructure ;
+    private ListStructure listStructure;
     @BindView(R.id.tv_empty_message)
     TextView tvMessage;
     @BindView(R.id.rv_structure_list)
@@ -113,7 +108,7 @@ public class NewListFragment extends Fragment implements PreviewListListener{
         setRetainInstance(true);
         //if (savedInstanceState == null) {
         //    DatabaseHelper databaseHelper = new DatabaseHelper();
-            key = databaseHelper.createList();
+        key = databaseHelper.createList();
         //} else {
         //    key = savedInstanceState.getString(KEY_LIST_ID);
         //}
@@ -124,12 +119,12 @@ public class NewListFragment extends Fragment implements PreviewListListener{
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view =  inflater.inflate(R.layout.fragment_new_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_new_list, container, false);
         unbinder = ButterKnife.bind(this, view);
 
-        if (false){
+        if (false) {
             listStructure = getJsonList();
             myDataset = listStructure.getItems();
         }
@@ -145,15 +140,16 @@ public class NewListFragment extends Fragment implements PreviewListListener{
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-            Intent intent = new Intent(getContext(), NewItemActivity.class);
-            intent.putExtra(KEY_LIST_ID, key);
-            startActivityForResult(intent, CODE_RESULT);
+                Intent intent = new Intent(getContext(), NewItemActivity.class);
+                intent.putExtra(KEY_LIST_ID, key);
+                intent.putExtra(KEY_EDITION, false);
+                startActivityForResult(intent, CODE_RESULT_NEW);
             }
         });
         return view;
     }
 
-    private void showData(){
+    private void showData() {
         if (myDataset.size() > 0) {
 
             tvMessage.setVisibility(GONE);
@@ -165,6 +161,7 @@ public class NewListFragment extends Fragment implements PreviewListListener{
             rvList.setVisibility(View.GONE);
         }
     }
+
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
@@ -223,6 +220,19 @@ public class NewListFragment extends Fragment implements PreviewListListener{
     }
 
     private void onListEditClicked(Item item) {
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonInString = null;
+        try {
+            jsonInString = mapper.writeValueAsString(item);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        Intent intent = new Intent(getContext(), NewItemActivity.class);
+        intent.putExtra(KEY_LIST_ID, key);
+        intent.putExtra(KEY_EDITION, true);
+        intent.putExtra(KEY_ITEM, jsonInString);
+        startActivityForResult(intent, CODE_RESULT_EDIT);
     }
 
     private void onListDeleteClicked(Item item) {
@@ -234,6 +244,7 @@ public class NewListFragment extends Fragment implements PreviewListListener{
             mAdapter.notifyItemRangeChanged(positionToDelete, myDataset.size());
         }
     }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -255,7 +266,7 @@ public class NewListFragment extends Fragment implements PreviewListListener{
         unbinder.unbind();
     }
 
-    private ListStructure getJsonList()  {
+    private ListStructure getJsonList() {
         ListStructure listStructure = new ListStructure();
         listStructure.setId(1);
         listStructure.setCompleted(false);
@@ -309,23 +320,39 @@ public class NewListFragment extends Fragment implements PreviewListListener{
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CODE_RESULT) {
-            if(resultCode == Activity.RESULT_OK){
-                String result=data.getStringExtra(KEY_RESULT_ITEM);
-                ObjectMapper mapper = new ObjectMapper();
-                try {
-                    Item obj = mapper.readValue(result, Item.class);
+        if (data != null) {
+            String result = data.getStringExtra(KEY_RESULT_ITEM);
+            ObjectMapper mapper = new ObjectMapper();
+            Item obj = new Item();
+            try {
+                obj = mapper.readValue(result, Item.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (requestCode == CODE_RESULT_NEW) {
+                if (resultCode == Activity.RESULT_OK) {
                     myDataset.add(obj);
                     showData();
                     mAdapter.notifyDataSetChanged();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                }
+                if (resultCode == Activity.RESULT_CANCELED) {
+                    //Write your code if there's no result
+                }
+            } else if (requestCode == CODE_RESULT_EDIT) {
+                if (resultCode == Activity.RESULT_OK) {
+                    int positionToUpdate = findPositionById(obj.getKey());
+                    if (positionToUpdate != error_not_found) {
+                        myDataset.set(positionToUpdate, obj);
+                        mAdapter.notifyItemChanged(positionToUpdate);
+                    }
+                }
+
+                if (resultCode == Activity.RESULT_CANCELED) {
+                    //Write your code if there's no result
                 }
             }
-            if (resultCode == Activity.RESULT_CANCELED) {
-                //Write your code if there's no result
-            }
         }
+
     }//onActivityResult
 
 

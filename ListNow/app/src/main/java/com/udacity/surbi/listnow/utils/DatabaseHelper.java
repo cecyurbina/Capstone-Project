@@ -13,11 +13,11 @@ import java.util.Map;
 public class DatabaseHelper {
     private DatabaseReference mDatabase;
 
-    public DatabaseHelper(){
+    public DatabaseHelper() {
         mDatabase = FirebaseDatabase.getInstance().getReference();
     }
 
-    public String createList(){
+    public String createList() {
         String key = mDatabase.child("lists").push().getKey();
         ListStructure listStructure = new ListStructure();
         listStructure.setName("Test");
@@ -27,35 +27,36 @@ public class DatabaseHelper {
         return key;
     }
 
-    public void renameList(){
+    public void renameList() {
 
     }
 
-    public void removeList(){
+    public void removeList() {
 
     }
 
-    public void copyList(boolean empty){
+    public void copyList(boolean empty) {
 
     }
 
-    public void addItemToList(String idList, Item item){
+    public void addItemToList(String idList, Item item) {
         String key = mDatabase.child("items").push().getKey();
         item.setKey(key);
         mDatabase.child("lists").child(idList).child("items").child(key).setValue(item);
     }
 
-    public void removeItemFromList(String idList, String idItem){
+    public void updateItem(String idList, Item item) {
+        mDatabase.child("lists").child(idList).child("items").child(item.getKey()).setValue(item);
+    }
+
+    public void removeItemFromList(String idList, String idItem) {
         mDatabase.child("lists").child(idList).child("items").child(idItem).removeValue();
     }
 
-    public void rejectItemFromList(String idList, String idItem){
+    public void rejectItemFromList(String idList, String idItem) {
         mDatabase.child("lists").child(idList).child("items").child(idItem).child("rejected").setValue(true);
     }
 
-    public void updateItem(){
-
-    }
 
 }
 

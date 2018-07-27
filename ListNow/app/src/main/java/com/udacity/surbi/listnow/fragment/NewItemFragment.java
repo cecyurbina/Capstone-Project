@@ -22,6 +22,8 @@ import com.udacity.surbi.listnow.activity.NewItemActivity;
 import com.udacity.surbi.listnow.data.Item;
 import com.udacity.surbi.listnow.utils.DatabaseHelper;
 
+import java.io.IOException;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -46,6 +48,7 @@ public class NewItemFragment extends Fragment {
     Button bAccept;
     private OnNewItemFragmentInteractionListener listener;
     private Item item;
+
     public NewItemFragment() {
     }
 
@@ -74,6 +77,9 @@ public class NewItemFragment extends Fragment {
 
             }
         });
+        if (listener.isEdition()) {
+            fillFields();
+        }
         return view;
     }
 
@@ -84,10 +90,13 @@ public class NewItemFragment extends Fragment {
     }
 
 
-
     public interface OnNewItemFragmentInteractionListener {
         // TODO: Update argument type and name
         String getListKey();
+
+        boolean isEdition();
+
+        String getItemString();
     }
 
     @Override
@@ -102,13 +111,17 @@ public class NewItemFragment extends Fragment {
 
     @OnClick(R.id.button_accept)
     void submitButton(View view) {
-        getItem();
         DatabaseHelper databaseHelper = new DatabaseHelper();
-        databaseHelper.addItemToList(listener.getListKey(), item);
+        getItem();
+        if (listener.isEdition()) {
+            databaseHelper.updateItem(listener.getListKey(), item);
+        } else {
+            databaseHelper.addItemToList(listener.getListKey(), item);
+        }
         if (getActivity() != null) {
             Intent returnIntent = new Intent();
-            returnIntent.putExtra(NewListFragment.KEY_RESULT_ITEM,getItemString());
-            getActivity().setResult(Activity.RESULT_OK,returnIntent);
+            returnIntent.putExtra(NewListFragment.KEY_RESULT_ITEM, getItemString());
+            getActivity().setResult(Activity.RESULT_OK, returnIntent);
             getActivity().finish();
         }
     }
@@ -120,19 +133,24 @@ public class NewItemFragment extends Fragment {
         }
     }
 
-    private void getItem(){
+    private void getItem() {
+        String keyItem = null;
+        if (item != null) {
+            keyItem = item.getKey();
+        }
         item = new Item();
+        item.setKey(keyItem);
         item.setName(etName.getText().toString());
         if (etQuantity.getText().toString().length() > 0) {
             item.setQuantity(Integer.valueOf(etQuantity.getText().toString()));
         }
         item.setUnit(etUnit.getText().toString());
         item.setRejected(false);
+        item.setImage(switchImage.isChecked());
 
     }
 
-    private String getItemString(){
-        item.setImage(switchImage.isChecked());
+    private String getItemString() {
         ObjectMapper mapper = new ObjectMapper();
         String jsonInString = null;
         try {
@@ -141,5 +159,29 @@ public class NewItemFragment extends Fragment {
             e.printStackTrace();
         }
         return jsonInString;
+    }
+
+    private void getItemFromString() {
+        ObjectMapper mapper = new ObjectMapper();
+        //JSON from String to Object
+        try {
+            item = mapper.readValue(listener.getItemString(), Item.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void fillFields() {
+        getItemFromString();
+        if (item.getName() != null) {
+            etName.setText(item.getName());
+        }
+        if (item.getQuantity() != null) {
+            etQuantity.setText(String.valueOf(item.getQuantity()));
+        }
+        if (item.getUnit() != null) {
+            etUnit.setText(item.getUnit());
+        }
+        switchImage.setChecked(item.getImage());
     }
 }
