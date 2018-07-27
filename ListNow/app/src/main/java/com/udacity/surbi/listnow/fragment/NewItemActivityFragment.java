@@ -1,5 +1,7 @@
 package com.udacity.surbi.listnow.fragment;
 
+import android.content.Context;
+import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,6 +12,8 @@ import android.widget.EditText;
 import android.widget.Switch;
 
 import com.udacity.surbi.listnow.R;
+import com.udacity.surbi.listnow.activity.NewItemActivity;
+import com.udacity.surbi.listnow.utils.DatabaseHelper;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -32,6 +36,7 @@ public class NewItemActivityFragment extends Fragment {
     Button bCancel;
     @BindView(R.id.button_accept)
     Button bAccept;
+    private OnNewItemFragmentInteractionListener listener;
 
     public NewItemActivityFragment() {
     }
@@ -40,7 +45,8 @@ public class NewItemActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_new_item, container, false);
         unbinder = ButterKnife.bind(this, view);
-
+        DatabaseHelper databaseHelper = new DatabaseHelper();
+        databaseHelper.addItemToList(listener.getListKey());
         return view;
     }
 
@@ -49,5 +55,21 @@ public class NewItemActivityFragment extends Fragment {
         super.onDestroyView();
         unbinder.unbind();
     }
+
+    public interface OnNewItemFragmentInteractionListener {
+        // TODO: Update argument type and name
+        String getListKey();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            listener = (NewItemActivity) context;
+        } catch (ClassCastException castException) {
+            /** The activity does not implement the listener. */
+        }
+    }
+
 
 }

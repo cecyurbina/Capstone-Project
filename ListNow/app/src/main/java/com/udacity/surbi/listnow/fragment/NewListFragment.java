@@ -1,18 +1,25 @@
 package com.udacity.surbi.listnow.fragment;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.udacity.surbi.listnow.R;
@@ -20,7 +27,9 @@ import com.udacity.surbi.listnow.activity.NewItemActivity;
 import com.udacity.surbi.listnow.adapter.CheckListAdapter;
 import com.udacity.surbi.listnow.adapter.PreviewListListener;
 import com.udacity.surbi.listnow.data.Item;
+import com.udacity.surbi.listnow.data.ItemList;
 import com.udacity.surbi.listnow.data.ListStructure;
+import com.udacity.surbi.listnow.utils.DatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +49,8 @@ import static android.view.View.GONE;
  * create an instance of this fragment.
  */
 public class NewListFragment extends Fragment implements PreviewListListener{
+    public static final String KEY_LIST_ID = "key_list_id";
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -58,6 +69,7 @@ public class NewListFragment extends Fragment implements PreviewListListener{
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private String key;
 
     private OnFragmentInteractionListener mListener;
 
@@ -86,6 +98,13 @@ public class NewListFragment extends Fragment implements PreviewListListener{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //setRetainInstance(true);
+        if (savedInstanceState == null) {
+            DatabaseHelper databaseHelper = new DatabaseHelper();
+            key = databaseHelper.createList();
+        } else {
+            key = savedInstanceState.getString(KEY_LIST_ID);
+        }
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -121,6 +140,7 @@ public class NewListFragment extends Fragment implements PreviewListListener{
             @Override
             public void onClick(View view) {
             Intent intent = new Intent(getContext(), NewItemActivity.class);
+            intent.putExtra(KEY_LIST_ID, key);
             startActivity(intent);
             }
         });
@@ -211,5 +231,21 @@ public class NewListFragment extends Fragment implements PreviewListListener{
 
         return listStructure;
     }
+
+    /*@Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            key = savedInstanceState.getString(KEY_LIST_ID);
+        }
+    }*/
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(KEY_LIST_ID, key);
+    }
+
 
 }
