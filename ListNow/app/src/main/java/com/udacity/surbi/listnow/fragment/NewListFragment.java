@@ -108,13 +108,26 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         setRetainInstance(true);
         //if (savedInstanceState == null) {
         //    DatabaseHelper databaseHelper = new DatabaseHelper();
-        key = databaseHelper.createList();
         //} else {
         //    key = savedInstanceState.getString(KEY_LIST_ID);
         //}
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            if (mListener != null) {
+                if (mListener.getList() == null) {
+                    key = databaseHelper.createList();
+                } else {
+                    listStructure = mapper.readValue(mListener.getList(), ListStructure.class);
+                    key = listStructure.getId();
+                    myDataset = listStructure.getItems();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -124,10 +137,6 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         View view = inflater.inflate(R.layout.fragment_new_list, container, false);
         unbinder = ButterKnife.bind(this, view);
 
-        if (false) {
-            listStructure = getJsonList();
-            myDataset = listStructure.getItems();
-        }
         mLayoutManager = new LinearLayoutManager(getContext());
         rvList.setLayoutManager(mLayoutManager);
         rvList.addItemDecoration(new DividerItemDecoration(rvList.getContext(), DividerItemDecoration.VERTICAL));
@@ -146,6 +155,8 @@ public class NewListFragment extends Fragment implements PreviewListListener {
                 startActivityForResult(intent, CODE_RESULT_NEW);
             }
         });
+
+
         return view;
     }
 
@@ -258,6 +269,11 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+
+        String getList();
+
+        boolean isNewList();
+
     }
 
     @Override
@@ -265,51 +281,6 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         super.onDestroyView();
         unbinder.unbind();
     }
-
-    private ListStructure getJsonList() {
-        ListStructure listStructure = new ListStructure();
-        listStructure.setId("mValueEventListener");
-        listStructure.setCompleted(false);
-        listStructure.setFavorite(false);
-
-        List<Item> items = new ArrayList<>();
-
-        Item item1 = new Item();
-        item1.setImage(false);
-        item1.setName("Shampoo");
-        item1.setQuantity(2);
-        item1.setUnit("botes");
-        item1.setRejected(true);
-
-        Item item2 = new Item();
-        item2.setImage(true);
-        item2.setName("Jabon");
-        item2.setQuantity(2);
-        item2.setUnit("barras");
-        item2.setRejected(true);
-
-        Item item3 = new Item();
-        item3.setImage(true);
-        item3.setName("Pasta dental");
-        item3.setRejected(false);
-
-        items.add(item1);
-        items.add(item2);
-        items.add(item3);
-
-        listStructure.setItems(items);
-
-        return listStructure;
-    }
-
-    /*@Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        if (savedInstanceState != null) {
-            key = savedInstanceState.getString(KEY_LIST_ID);
-        }
-    }*/
 
     @Override
     public void onSaveInstanceState(Bundle outState) {

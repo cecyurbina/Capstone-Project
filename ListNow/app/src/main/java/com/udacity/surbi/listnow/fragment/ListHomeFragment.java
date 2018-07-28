@@ -24,11 +24,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.udacity.surbi.listnow.R;
 import com.udacity.surbi.listnow.activity.CheckListContainerActivity;
+import com.udacity.surbi.listnow.activity.NewListActivity;
 import com.udacity.surbi.listnow.adapter.ListAdapter;
 import com.udacity.surbi.listnow.data.Item;
 import com.udacity.surbi.listnow.data.ListStructure;
 import com.udacity.surbi.listnow.utils.DatabaseHelper;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -146,7 +148,7 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     public void onSelectedItem(ListStructure itemList) {
         try {
             String jsonList = getJsonList(itemList);
-            Intent intent = new Intent(getContext(), CheckListContainerActivity.class);
+            Intent intent = new Intent(getContext(), NewListActivity.class);
             intent.putExtra(KEY_LIST_JSON, jsonList);
             startActivity(intent);
         } catch (JsonProcessingException e) {
