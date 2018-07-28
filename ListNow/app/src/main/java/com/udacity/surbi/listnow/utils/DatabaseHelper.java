@@ -20,14 +20,15 @@ public class DatabaseHelper {
      * CREATE LIST
      * @return id
      */
-    public String createList() {
+    public ListStructure createList() {
         String key = mDatabase.child("lists").push().getKey();
         ListStructure listStructure = new ListStructure();
-        listStructure.setName("Test");
+        listStructure.setName("New list");
         listStructure.setFavorite(false);
         listStructure.setCompleted(false);
+        listStructure.setId(key);
         mDatabase.child("lists").child(key).setValue(listStructure);
-        return key;
+        return listStructure;
     }
 
     public void renameList(String key, String name) {

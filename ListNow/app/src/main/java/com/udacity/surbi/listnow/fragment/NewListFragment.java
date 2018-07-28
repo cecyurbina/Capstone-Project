@@ -119,7 +119,8 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         try {
             if (mListener != null) {
                 if (mListener.getList() == null) {
-                    key = databaseHelper.createList();
+                    listStructure = databaseHelper.createList();
+                    key = listStructure.getId();
                 } else {
                     listStructure = mapper.readValue(mListener.getList(), ListStructure.class);
                     key = listStructure.getId();
@@ -156,7 +157,7 @@ public class NewListFragment extends Fragment implements PreviewListListener {
             }
         });
 
-
+        getActivity().setTitle(listStructure.getName());
         return view;
     }
 
