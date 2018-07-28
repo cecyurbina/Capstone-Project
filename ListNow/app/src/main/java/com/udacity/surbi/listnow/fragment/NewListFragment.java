@@ -12,10 +12,13 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -75,6 +78,8 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     RecyclerView rvList;
     @BindView(R.id.floating_action_button)
     FloatingActionButton floatingActionButton;
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
     private Unbinder unbinder;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -237,6 +242,7 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     @Override
     public void onCheck(Item item) {
         databaseHelper.checkItem(key, item);
+        updateProgressBar();
     }
 
     private void onListRejectClicked(Item item) {
@@ -380,6 +386,7 @@ public class NewListFragment extends Fragment implements PreviewListListener {
                     myDataset.add(item);
                 }
                 mAdapter.notifyDataSetChanged();
+                updateProgressBar();
             }
 
             @Override
@@ -389,6 +396,24 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         };
         mDatabaseReference.addValueEventListener(valueEventListener);
         mValueEventListener = valueEventListener;
+
+    }
+
+    private void updateProgressBar() {
+        int count = 0;
+        for (Item item: myDataset){
+            if (item.isChecked()){
+                count ++;
+            }
+        }
+        int totalChecks=myDataset.size();
+        double total = 0;
+        if (totalChecks != 0) {
+            total =  (((double) count / (double) totalChecks) * 100);
+        }
+       progressBar.setProgress((int)Math.ceil(total));
+
+
 
     }
 

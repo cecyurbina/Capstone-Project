@@ -95,7 +95,7 @@ public class CheckListAdapter extends RecyclerView.Adapter<CheckListAdapter.View
         } else {
             holder.tvReject.setVisibility(View.GONE);
         }
-
+        holder.cbCheck.setOnCheckedChangeListener(null);
         if (currentItem.isChecked() != null) {
             holder.cbCheck.setChecked(currentItem.isChecked());
         } else {
