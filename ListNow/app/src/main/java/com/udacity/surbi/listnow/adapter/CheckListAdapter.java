@@ -6,6 +6,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -35,7 +37,7 @@ public class CheckListAdapter extends RecyclerView.Adapter<CheckListAdapter.View
         @BindView(R.id.tv_reject)
         TextView tvReject;
         @BindView(R.id.checkBox)
-        TextView cbCheck;
+        CheckBox cbCheck;
 
 
         public ViewHolder(View v) {
@@ -94,12 +96,25 @@ public class CheckListAdapter extends RecyclerView.Adapter<CheckListAdapter.View
             holder.tvReject.setVisibility(View.GONE);
         }
 
+        if (currentItem.isChecked() != null) {
+            holder.cbCheck.setChecked(currentItem.isChecked());
+        } else {
+            holder.cbCheck.setChecked(false);
+        }
+
         holder.viewItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (listener != null) {
                     listener.onSelectedItem(currentItem, holder.viewItem);
                 }
+            }
+        });
+
+        holder.cbCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
+                listener.onCheck(currentItem);
             }
         });
     }

@@ -224,6 +224,11 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         popup.show();
     }
 
+    @Override
+    public void onCheck(Item item) {
+        databaseHelper.checkItem(key, item);
+    }
+
     private void onListRejectClicked(Item item) {
         item.setRejected(true);
         databaseHelper.rejectItemFromList(key, item.getKey());

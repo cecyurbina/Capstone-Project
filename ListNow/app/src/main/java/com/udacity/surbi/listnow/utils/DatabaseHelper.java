@@ -100,6 +100,10 @@ public class DatabaseHelper {
         mDatabase.child("lists").child(idList).child("items").child(idItem).child("rejected").setValue(true);
     }
 
+    public void checkItem(String idList, Item item) {
+        mDatabase.child("lists").child(idList).child("items").child(item.getKey()).child("checked").setValue(!item.isChecked());
+    }
+
 
 }
 

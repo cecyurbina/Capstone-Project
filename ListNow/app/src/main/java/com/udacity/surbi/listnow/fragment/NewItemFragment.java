@@ -147,6 +147,7 @@ public class NewItemFragment extends Fragment {
         item.setUnit(etUnit.getText().toString());
         item.setRejected(false);
         item.setImage(switchImage.isChecked());
+        item.setChecked(false);
 
     }
 

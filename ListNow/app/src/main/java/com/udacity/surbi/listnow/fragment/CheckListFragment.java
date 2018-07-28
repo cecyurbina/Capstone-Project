@@ -160,6 +160,11 @@ public class CheckListFragment extends Fragment implements PreviewListListener {
         popup.show();
     }
 
+    @Override
+    public void onCheck(Item item) {
+
+    }
+
     private void onListRejectClicked(MenuItem item) {
     }
 

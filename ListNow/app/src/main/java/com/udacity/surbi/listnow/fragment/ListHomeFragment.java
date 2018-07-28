@@ -345,6 +345,7 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
             item2.setKey(childDataSnapshot.getKey());
             item2.setName((String) childDataSnapshot.child("name").getValue());
             item2.setImage((Boolean) childDataSnapshot.child("image").getValue());
+            item2.setChecked((Boolean) childDataSnapshot.child("checked").getValue());
             if (childDataSnapshot.child("quantity").getValue() != null) {
                 item2.setQuantity(((Long) childDataSnapshot.child("quantity").getValue()).intValue());
             }

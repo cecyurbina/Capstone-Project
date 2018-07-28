@@ -17,7 +17,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
         "unit",
         "quantity",
         "imageUrl",
-        "rejected"
+        "rejected",
+        "checked"
 })
 public class Item {
     @JsonProperty("key")
@@ -34,6 +35,8 @@ public class Item {
     private String imageUrl;
     @JsonProperty("rejected")
     private Boolean rejected;
+    @JsonProperty("checked")
+    private Boolean checked;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -105,6 +108,16 @@ public class Item {
     @JsonProperty("rejected")
     public void setRejected(Boolean rejected) {
         this.rejected = rejected;
+    }
+
+    @JsonProperty("checked")
+    public Boolean isChecked() {
+        return checked;
+    }
+
+    @JsonProperty("checked")
+    public void setChecked(Boolean checked) {
+        this.checked = checked;
     }
 
     @JsonAnyGetter
