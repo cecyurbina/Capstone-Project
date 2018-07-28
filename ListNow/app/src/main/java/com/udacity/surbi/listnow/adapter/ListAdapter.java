@@ -10,8 +10,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.udacity.surbi.listnow.data.ItemList;
 import com.udacity.surbi.listnow.R;
+import com.udacity.surbi.listnow.data.ListStructure;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
-    private List<ItemList> mDataset;
+    private List<ListStructure> mDataset;
     private OnItemSelectedListener listener;
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -40,7 +40,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         }
     }
 
-    public ListAdapter(List<ItemList> myDataset, OnItemSelectedListener onItemSelectedListener) {
+    public ListAdapter(List<ListStructure> myDataset, OnItemSelectedListener onItemSelectedListener) {
         mDataset = myDataset;
         listener = onItemSelectedListener;
     }
@@ -54,10 +54,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
-        final ItemList currentItem = mDataset.get(holder.getAdapterPosition());
+        final ListStructure currentItem = mDataset.get(holder.getAdapterPosition());
         Context context = holder.itemView.getContext();
-        holder.tvTile.setText(currentItem.getTitle());
-        String status = (currentItem.isCompleted()) ? context.getString(R.string.home_list_status_completed) : context.getString(R.string.home_list_status_pending);
+        holder.tvTile.setText(currentItem.getName());
+        String status = (currentItem.getCompleted()) ? context.getString(R.string.home_list_status_completed) : context.getString(R.string.home_list_status_pending);
         holder.tvStatus.setText(status);
         holder.ibImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,7 +77,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             }
         });
 
-        holder.ivFav.setVisibility((currentItem.isFavorite()) ? View.VISIBLE : View.GONE);
+        holder.ivFav.setVisibility((currentItem.getFavorite()) ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -86,8 +86,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     }
 
     public interface OnItemSelectedListener {
-        void onSelectedItem(ItemList itemList);
+        void onSelectedItem(ListStructure itemList);
 
-        void onSelectedItemMenu(ItemList itemList, View view);
+        void onSelectedItemMenu(ListStructure itemList, View view);
     }
 }

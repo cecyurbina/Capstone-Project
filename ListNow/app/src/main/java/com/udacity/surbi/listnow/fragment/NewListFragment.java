@@ -85,7 +85,7 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     }
 
     /**
-     * Use this factory method to create a new instance of
+     * Use this factory method to create mValueEventListener new instance of
      * this fragment using the provided parameters.
      *
      * @param param1 Parameter 1.
@@ -251,9 +251,9 @@ public class NewListFragment extends Fragment implements PreviewListListener {
      * to the activity and potentially other fragments contained in that
      * activity.
      * <p>
-     * See the Android Training lesson <a href=
+     * See the Android Training lesson <mValueEventListener href=
      * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
+     * >Communicating with Other Fragments</mValueEventListener> for more information.
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
@@ -268,7 +268,7 @@ public class NewListFragment extends Fragment implements PreviewListListener {
 
     private ListStructure getJsonList() {
         ListStructure listStructure = new ListStructure();
-        listStructure.setId(1);
+        listStructure.setId("mValueEventListener");
         listStructure.setCompleted(false);
         listStructure.setFavorite(false);
 

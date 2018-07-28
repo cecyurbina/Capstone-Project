@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,11 +22,15 @@ import android.widget.EditText;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.udacity.surbi.listnow.activity.CheckListContainerActivity;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.udacity.surbi.listnow.R;
+import com.udacity.surbi.listnow.activity.CheckListContainerActivity;
 import com.udacity.surbi.listnow.adapter.ListAdapter;
 import com.udacity.surbi.listnow.data.Item;
-import com.udacity.surbi.listnow.data.ItemList;
 import com.udacity.surbi.listnow.data.ListStructure;
 
 import java.util.ArrayList;
@@ -47,12 +52,13 @@ import butterknife.Unbinder;
 public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSelectedListener {
     public static final String KEY_LIST_JSON = "key_list_json";
     private static final int error_not_found = -1;
+
     @BindView(R.id.rv_list)
     RecyclerView rvList;
     private Unbinder unbinder;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    List<ItemList> myDataset = new ArrayList<>();
+    List<ListStructure> myDataset = new ArrayList<>();
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -62,7 +68,8 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
+    ValueEventListener mValueEventListener;
+    DatabaseReference mDatabaseReference;
     private OnFragmentInteractionListener mListener;
 
     public ListHomeFragment() {
@@ -70,7 +77,7 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     }
 
     /**
-     * Use this factory method to create a new instance of
+     * Use this factory method to create mValueEventListener new instance of
      * this fragment using the provided parameters.
      *
      * @param param1 Parameter 1.
@@ -90,20 +97,18 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        myDataset.add(new ItemList(1, "Clothes Shopping", false, false));
-        myDataset.add(new ItemList(2, "Christmas presents", false, false));
-        myDataset.add(new ItemList(3, "Dads party", false, false));
-        myDataset.add(new ItemList(4, "Home shopping", false, false));
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_list_home, container, false);
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("lists");
         unbinder = ButterKnife.bind(this, view);
 
         rvList.setHasFixedSize(true);
@@ -116,12 +121,6 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
 
     @Override
     public void onAttach(Context context) {
@@ -146,9 +145,9 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     }
 
     @Override
-    public void onSelectedItem(ItemList itemList) {
+    public void onSelectedItem(ListStructure itemList) {
         try {
-            String jsonList = getJsonList();
+            String jsonList = getJsonList(itemList);
             Intent intent = new Intent(getContext(), CheckListContainerActivity.class);
             intent.putExtra(KEY_LIST_JSON, jsonList);
             startActivity(intent);
@@ -159,7 +158,7 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     }
 
     @Override
-    public void onSelectedItemMenu(final ItemList itemList, View view) {
+    public void onSelectedItemMenu(final ListStructure itemList, View view) {
         if (getContext() == null) {
             return;
         }
@@ -203,18 +202,22 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
      * to the activity and potentially other fragments contained in that
      * activity.
      * <p>
-     * See the Android Training lesson <a href=
+     * See the Android Training lesson <mValueEventListener href=
      * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
+     * >Communicating with Other Fragments</mValueEventListener> for more information.
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
 
-    private void onCopyMenuClicked(ItemList itemList, boolean isEmpty) {
-        ItemList newItemListCopied = new ItemList(myDataset.size() + 2, itemList.getTitle() + " " + getString(R.string.home_list_copy_added_to_name), false, false);
-        myDataset.add(newItemListCopied);
+    private void onCopyMenuClicked(ListStructure itemList, boolean isEmpty) {
+        ListStructure newItemCopied = new ListStructure();
+        newItemCopied.setId(itemList.getId()+String.valueOf(myDataset.size()));
+        newItemCopied.setName(itemList.getName() + " " + getString(R.string.home_list_copy_added_to_name));
+        newItemCopied.setFavorite(false);
+        newItemCopied.setCompleted(false);
+        myDataset.add(newItemCopied);
         mAdapter.notifyDataSetChanged();
     }
 
@@ -223,37 +226,37 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
      *
      * @param itemList item to share
      */
-    private void onShareMenuClicked(ItemList itemList) {
+    private void onShareMenuClicked(ListStructure itemList) {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, itemList.getTitle());
+        sendIntent.putExtra(Intent.EXTRA_TEXT, itemList.getName());
         sendIntent.setType("text/plain");
         startActivity(sendIntent);
     }
 
-    private void onRenameMenuClicked(ItemList itemList) {
+    private void onRenameMenuClicked(ListStructure itemList) {
         showInputDialog(itemList);
     }
 
-    private void onCompletedMenuClicked(ItemList itemList) {
+    private void onCompletedMenuClicked(ListStructure itemList) {
         int position = findPositionById(itemList.getId());
         if (position != error_not_found) {
-            ItemList item = myDataset.get(position);
-            myDataset.get(position).setCompleted(!item.isCompleted());
+            ListStructure item = myDataset.get(position);
+            myDataset.get(position).setCompleted(!item.getCompleted());
             mAdapter.notifyDataSetChanged();
         }
     }
 
-    private void onFavoriteMenuClicked(ItemList itemList) {
+    private void onFavoriteMenuClicked(ListStructure itemList) {
         int position = findPositionById(itemList.getId());
         if (position != error_not_found) {
-            ItemList item = myDataset.get(position);
-            myDataset.get(position).setFavorite(!item.isFavorite());
+            ListStructure item = myDataset.get(position);
+            myDataset.get(position).setFavorite(!item.getFavorite());
             mAdapter.notifyDataSetChanged();
         }
     }
 
-    private void onDeleteMenuClicked(ItemList itemList) {
+    private void onDeleteMenuClicked(ListStructure itemList) {
         int position = findPositionById(itemList.getId());
         if (position != error_not_found) {
             myDataset.remove(position);
@@ -267,15 +270,15 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
      *
      * @param itemList item to modify
      */
-    private void showInputDialog(final ItemList itemList) {
+    private void showInputDialog(final ListStructure itemList) {
         if (getContext() != null) {
             final Button buttonAccept;
             final EditText etNewName = new EditText(getContext());
             etNewName.setHint(getString(R.string.home_dialog_rename_new_name));
 
-            AlertDialog.Builder dialog = new AlertDialog.Builder(getContext()).setTitle(getString(R.string.home_dialog_rename_title, itemList.getTitle())).setView(etNewName).setPositiveButton(getString(R.string.accept), new DialogInterface.OnClickListener() {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(getContext()).setTitle(getString(R.string.home_dialog_rename_title, itemList.getName())).setView(etNewName).setPositiveButton(getString(R.string.accept), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    itemList.setTitle(etNewName.getText().toString());
+                    itemList.setName(etNewName.getText().toString());
                     updateListNewTitle(itemList);
                 }
             }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -315,10 +318,10 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
      *
      * @param itemList item modified
      */
-    private void updateListNewTitle(ItemList itemList) {
-        for (ItemList il : myDataset) {
-            if (il.getId() == itemList.getId()) {
-                il.setTitle(itemList.getTitle());
+    private void updateListNewTitle(ListStructure itemList) {
+        for (ListStructure il : myDataset) {
+            if (il.getId().equals(itemList.getId())) {
+                il.setName(itemList.getName());
                 break;
             }
         }
@@ -331,19 +334,19 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
      * @param id element to find
      * @return position
      */
-    private int findPositionById(int id) {
+    private int findPositionById(String id) {
         int positionToRemove;
         for (int i = 0; i < myDataset.size(); i++) {
-            if (myDataset.get(i).getId() == id) {
+            if (myDataset.get(i).getId().equals(id)) {
                 return i;
             }
         }
         return error_not_found;
     }
 
-    private String getJsonList() throws JsonProcessingException {
-        ListStructure listStructure = new ListStructure();
-        listStructure.setId(1);
+    private String getJsonList(ListStructure listStructure) throws JsonProcessingException {
+        /*ListStructure listStructure = new ListStructure();
+        listStructure.setId("mValueEventListener");
         listStructure.setCompleted(false);
         listStructure.setFavorite(false);
 
@@ -370,12 +373,67 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
 
         items.add(item1);
         items.add(item2);
-        items.add(item3);
+        items.add(item3);*/
+        List<Item> items = new ArrayList<>();
+
+        for (DataSnapshot childDataSnapshot : listStructure.getDataSnapshot().getChildren()) {
+            Item item2 = new Item();
+            item2.setKey(childDataSnapshot.getKey());
+            item2.setName((String) childDataSnapshot.child("name").getValue());
+            item2.setImage((Boolean) childDataSnapshot.child("image").getValue());
+            if (childDataSnapshot.child("quantity").getValue() != null) {
+                item2.setQuantity(((Long) childDataSnapshot.child("quantity").getValue()).intValue());
+            }
+            item2.setUnit((String) childDataSnapshot.child("unit").getValue());
+            item2.setRejected((Boolean) childDataSnapshot.child("rejected").getValue());
+            items.add(item2);
+        }
 
         listStructure.setItems(items);
 
         ObjectMapper mapper = new ObjectMapper();
         String jsonInString = mapper.writeValueAsString(listStructure);
         return jsonInString;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+
+
+        ValueEventListener valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                myDataset.clear();
+                for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren()) {
+                    ListStructure listStructure = new ListStructure();
+                    listStructure.setId(childDataSnapshot.getKey());
+                    listStructure.setName((String) childDataSnapshot.child("name").getValue());
+                    listStructure.setCompleted((Boolean) childDataSnapshot.child("completed").getValue());
+                    listStructure.setFavorite((Boolean) childDataSnapshot.child("favorite").getValue());
+                    listStructure.setDataSnapshot(childDataSnapshot.child("items"));
+                    myDataset.add(listStructure);
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+        mDatabaseReference.addValueEventListener(valueEventListener);
+        mValueEventListener = valueEventListener;
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mValueEventListener != null){
+            mDatabaseReference.removeEventListener(mValueEventListener);
+        }
+
     }
 }

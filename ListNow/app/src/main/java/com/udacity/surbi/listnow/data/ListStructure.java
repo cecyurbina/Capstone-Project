@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -24,27 +25,29 @@ import com.google.firebase.database.IgnoreExtraProperties;
 public class ListStructure {
 
     @JsonProperty("id")
-    private Integer id;
+    private String id;
     @JsonProperty("name")
     private String name;
     @JsonProperty("owner")
     private Owner owner;
     @JsonProperty("completed")
-    private Boolean completed;
+    private Boolean completed = false;
     @JsonProperty("favorite")
-    private Boolean favorite;
+    private Boolean favorite = false;
     @JsonProperty("items")
     private List<Item> items = null;
+    @JsonIgnore
+    private DataSnapshot dataSnapshot = null;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("id")
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
     @JsonProperty("id")
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -106,6 +109,14 @@ public class ListStructure {
     @JsonAnySetter
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);
+    }
+
+    public DataSnapshot getDataSnapshot() {
+        return dataSnapshot;
+    }
+
+    public void setDataSnapshot(DataSnapshot dataSnapshot) {
+        this.dataSnapshot = dataSnapshot;
     }
 
 }
