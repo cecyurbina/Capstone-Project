@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
@@ -32,6 +33,7 @@ import com.udacity.surbi.listnow.activity.CheckListContainerActivity;
 import com.udacity.surbi.listnow.adapter.ListAdapter;
 import com.udacity.surbi.listnow.data.Item;
 import com.udacity.surbi.listnow.data.ListStructure;
+import com.udacity.surbi.listnow.utils.DatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +51,7 @@ import butterknife.Unbinder;
  * Use the {@link ListHomeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSelectedListener {
+public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSelectedListener, RenameDialogFragment.RenameDialogListener {
     public static final String KEY_LIST_JSON = "key_list_json";
     private static final int error_not_found = -1;
 
@@ -59,6 +61,7 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     List<ListStructure> myDataset = new ArrayList<>();
+    DatabaseHelper mDatabaseHelper;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -108,6 +111,7 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_list_home, container, false);
+        mDatabaseHelper = new DatabaseHelper();
         mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("lists");
         unbinder = ButterKnife.bind(this, view);
 
@@ -196,6 +200,19 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
         popup.show();
     }
 
+    @Override
+    public void onFinishRenameDialog(String inputText, String id) {
+        int position = findPositionById(id);
+        if (position != error_not_found) {
+            mDatabaseHelper.renameList(id, inputText);
+            ListStructure item = myDataset.get(position);
+            item.setName(inputText);
+            mAdapter.notifyDataSetChanged();
+
+        }
+
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -212,12 +229,8 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     }
 
     private void onCopyMenuClicked(ListStructure itemList, boolean isEmpty) {
-        ListStructure newItemCopied = new ListStructure();
-        newItemCopied.setId(itemList.getId()+String.valueOf(myDataset.size()));
-        newItemCopied.setName(itemList.getName() + " " + getString(R.string.home_list_copy_added_to_name));
-        newItemCopied.setFavorite(false);
-        newItemCopied.setCompleted(false);
-        myDataset.add(newItemCopied);
+        setItemsOnList(itemList);
+        myDataset.add(mDatabaseHelper.copyList(itemList));
         mAdapter.notifyDataSetChanged();
     }
 
@@ -235,13 +248,14 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     }
 
     private void onRenameMenuClicked(ListStructure itemList) {
-        showInputDialog(itemList);
+        showAlertDialog(itemList);
     }
 
     private void onCompletedMenuClicked(ListStructure itemList) {
         int position = findPositionById(itemList.getId());
         if (position != error_not_found) {
             ListStructure item = myDataset.get(position);
+            mDatabaseHelper.completeList(itemList.getId(), !item.getCompleted());
             myDataset.get(position).setCompleted(!item.getCompleted());
             mAdapter.notifyDataSetChanged();
         }
@@ -251,6 +265,7 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
         int position = findPositionById(itemList.getId());
         if (position != error_not_found) {
             ListStructure item = myDataset.get(position);
+            mDatabaseHelper.favoriteList(itemList.getId(), !item.getFavorite());
             myDataset.get(position).setFavorite(!item.getFavorite());
             mAdapter.notifyDataSetChanged();
         }
@@ -345,62 +360,14 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     }
 
     private String getJsonList(ListStructure listStructure) throws JsonProcessingException {
-        /*ListStructure listStructure = new ListStructure();
-        listStructure.setId("mValueEventListener");
-        listStructure.setCompleted(false);
-        listStructure.setFavorite(false);
-
-        List<Item> items = new ArrayList<>();
-
-        Item item1 = new Item();
-        item1.setImage(false);
-        item1.setName("Shampoo");
-        item1.setQuantity(2);
-        item1.setUnit("botes");
-        item1.setRejected(true);
-
-        Item item2 = new Item();
-        item2.setImage(true);
-        item2.setName("Jabon");
-        item2.setQuantity(2);
-        item2.setUnit("barras");
-        item2.setRejected(true);
-
-        Item item3 = new Item();
-        item3.setImage(true);
-        item3.setName("Pasta dental");
-        item3.setRejected(false);
-
-        items.add(item1);
-        items.add(item2);
-        items.add(item3);*/
-        List<Item> items = new ArrayList<>();
-
-        for (DataSnapshot childDataSnapshot : listStructure.getDataSnapshot().getChildren()) {
-            Item item2 = new Item();
-            item2.setKey(childDataSnapshot.getKey());
-            item2.setName((String) childDataSnapshot.child("name").getValue());
-            item2.setImage((Boolean) childDataSnapshot.child("image").getValue());
-            if (childDataSnapshot.child("quantity").getValue() != null) {
-                item2.setQuantity(((Long) childDataSnapshot.child("quantity").getValue()).intValue());
-            }
-            item2.setUnit((String) childDataSnapshot.child("unit").getValue());
-            item2.setRejected((Boolean) childDataSnapshot.child("rejected").getValue());
-            items.add(item2);
-        }
-
-        listStructure.setItems(items);
-
+        setItemsOnList(listStructure);
         ObjectMapper mapper = new ObjectMapper();
-        String jsonInString = mapper.writeValueAsString(listStructure);
-        return jsonInString;
+        return mapper.writeValueAsString(listStructure);
     }
 
     @Override
     public void onStart() {
         super.onStart();
-
-
 
         ValueEventListener valueEventListener = new ValueEventListener() {
             @Override
@@ -436,4 +403,31 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
         }
 
     }
+
+    private void setItemsOnList(ListStructure listStructure){
+        List<Item> items = new ArrayList<>();
+
+        for (DataSnapshot childDataSnapshot : listStructure.getDataSnapshot().getChildren()) {
+            Item item2 = new Item();
+            item2.setKey(childDataSnapshot.getKey());
+            item2.setName((String) childDataSnapshot.child("name").getValue());
+            item2.setImage((Boolean) childDataSnapshot.child("image").getValue());
+            if (childDataSnapshot.child("quantity").getValue() != null) {
+                item2.setQuantity(((Long) childDataSnapshot.child("quantity").getValue()).intValue());
+            }
+            item2.setUnit((String) childDataSnapshot.child("unit").getValue());
+            item2.setRejected((Boolean) childDataSnapshot.child("rejected").getValue());
+            items.add(item2);
+        }
+
+        listStructure.setItems(items);
+    }
+
+    private void showAlertDialog(ListStructure listStructure) {
+        FragmentManager fm = getActivity().getSupportFragmentManager();
+        RenameDialogFragment alertDialog = RenameDialogFragment.newInstance(getString(R.string.home_dialog_rename_title, listStructure.getName()), listStructure.getId());
+        alertDialog.setTargetFragment(ListHomeFragment.this, 200);
+        alertDialog.show(fm, "fragment_alert");
+    }
+
 }

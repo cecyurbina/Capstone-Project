@@ -22,7 +22,7 @@ import com.google.firebase.database.IgnoreExtraProperties;
         "items"
 })
 @IgnoreExtraProperties
-public class ListStructure {
+public class ListStructure implements Cloneable {
 
     @JsonProperty("id")
     private String id;
@@ -119,4 +119,8 @@ public class ListStructure {
         this.dataSnapshot = dataSnapshot;
     }
 
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }
