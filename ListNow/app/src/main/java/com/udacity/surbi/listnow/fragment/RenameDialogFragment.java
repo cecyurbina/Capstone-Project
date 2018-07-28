@@ -58,14 +58,19 @@ public class RenameDialogFragment extends DialogFragment {
         container.addView(etNewName);
         alertDialogBuilder.setTitle(title);
         alertDialogBuilder.setView(container);
+
         alertDialogBuilder.setPositiveButton(getString(R.string.accept),  new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                RenameDialogListener listener = (RenameDialogListener) getTargetFragment();
-                if (listener != null) {
-                    listener.onFinishRenameDialog(etNewName.getText().toString(), id);
+                if (etNewName.getText().toString().length() > 0) {
+                    RenameDialogListener listener = (RenameDialogListener) getTargetFragment();
+                    if (listener != null) {
+                        listener.onFinishRenameDialog(etNewName.getText().toString(), id);
+                    }
+                    dismiss();
+                } else {
+                    etNewName.setHint(getString(R.string.home_dialog_rename_new_name_please));
                 }
-                dismiss();
 
             }
         });

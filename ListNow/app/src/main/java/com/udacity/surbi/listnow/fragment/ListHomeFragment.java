@@ -1,25 +1,19 @@
 package com.udacity.surbi.listnow.fragment;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -242,7 +236,7 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     private void onShareMenuClicked(ListStructure itemList) {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, itemList.getName());
+        sendIntent.putExtra(Intent.EXTRA_TEXT, itemList.getId());
         sendIntent.setType("text/plain");
         startActivity(sendIntent);
     }
@@ -274,73 +268,11 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     private void onDeleteMenuClicked(ListStructure itemList) {
         int position = findPositionById(itemList.getId());
         if (position != error_not_found) {
+            mDatabaseHelper.removeList(itemList.getId());
             myDataset.remove(position);
             mAdapter.notifyItemRemoved(position);
             mAdapter.notifyItemRangeChanged(position, myDataset.size());
         }
-    }
-
-    /**
-     * Show dialog to enter new name
-     *
-     * @param itemList item to modify
-     */
-    private void showInputDialog(final ListStructure itemList) {
-        if (getContext() != null) {
-            final Button buttonAccept;
-            final EditText etNewName = new EditText(getContext());
-            etNewName.setHint(getString(R.string.home_dialog_rename_new_name));
-
-            AlertDialog.Builder dialog = new AlertDialog.Builder(getContext()).setTitle(getString(R.string.home_dialog_rename_title, itemList.getName())).setView(etNewName).setPositiveButton(getString(R.string.accept), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    itemList.setName(etNewName.getText().toString());
-                    updateListNewTitle(itemList);
-                }
-            }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                }
-            });
-            buttonAccept = dialog.show().getButton(AlertDialog.BUTTON_POSITIVE);
-            //disable accept if input is empty
-            buttonAccept.setEnabled(false);
-
-            //validate empty list name
-            etNewName.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    //enable button if input is not empty
-                    if (etNewName.getText().length() > 0) {
-                        buttonAccept.setEnabled(true);
-                    } else {
-                        buttonAccept.setEnabled(false);
-                    }
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-
-                }
-            });
-        }
-    }
-
-    /**
-     * Update list in view after list item is renamed
-     *
-     * @param itemList item modified
-     */
-    private void updateListNewTitle(ListStructure itemList) {
-        for (ListStructure il : myDataset) {
-            if (il.getId().equals(itemList.getId())) {
-                il.setName(itemList.getName());
-                break;
-            }
-        }
-        mAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -350,7 +282,6 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
      * @return position
      */
     private int findPositionById(String id) {
-        int positionToRemove;
         for (int i = 0; i < myDataset.size(); i++) {
             if (myDataset.get(i).getId().equals(id)) {
                 return i;
@@ -381,8 +312,8 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
                     listStructure.setFavorite((Boolean) childDataSnapshot.child("favorite").getValue());
                     listStructure.setDataSnapshot(childDataSnapshot.child("items"));
                     myDataset.add(listStructure);
-                    mAdapter.notifyDataSetChanged();
                 }
+                mAdapter.notifyDataSetChanged();
             }
 
             @Override
