@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
@@ -19,6 +20,11 @@ import android.widget.TextView;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.udacity.surbi.listnow.R;
 import com.udacity.surbi.listnow.activity.NewItemActivity;
 import com.udacity.surbi.listnow.adapter.CheckListAdapter;
@@ -56,7 +62,8 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     public static final String KEY_RESULT_ITEM = "key_result_item";
     private static final int error_not_found = -1;
 
-
+    ValueEventListener mValueEventListener;
+    DatabaseReference mDatabaseReference;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -136,6 +143,8 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_new_list, container, false);
+        databaseHelper = new DatabaseHelper();
+        mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("lists").child(key).child("items");
         unbinder = ButterKnife.bind(this, view);
 
         mLayoutManager = new LinearLayoutManager(getContext());
@@ -346,5 +355,49 @@ public class NewListFragment extends Fragment implements PreviewListListener {
             }
         }
         return error_not_found;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        ValueEventListener valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                myDataset.clear();
+                for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren()) {
+                    Item item = new Item();
+                    item.setKey(childDataSnapshot.getKey());
+                    item.setName((String) childDataSnapshot.child("name").getValue());
+                    item.setImage((Boolean) childDataSnapshot.child("image").getValue());
+                    item.setUnit((String) childDataSnapshot.child("unit").getValue());
+                    if (childDataSnapshot.child("quantity").getValue() != null) {
+                        item.setQuantity(((Long) childDataSnapshot.child("quantity").getValue()).intValue());
+                    }
+                    item.setImageUrl((String) childDataSnapshot.child("imageUrl").getValue());
+                    item.setRejected((Boolean) childDataSnapshot.child("rejected").getValue());
+                    item.setChecked((Boolean) childDataSnapshot.child("checked").getValue());
+                    myDataset.add(item);
+                }
+                mAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+        mDatabaseReference.addValueEventListener(valueEventListener);
+        mValueEventListener = valueEventListener;
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mValueEventListener != null){
+            mDatabaseReference.removeEventListener(mValueEventListener);
+        }
+
     }
 }
