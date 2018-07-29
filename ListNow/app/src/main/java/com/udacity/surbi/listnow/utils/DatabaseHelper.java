@@ -105,6 +105,10 @@ public class DatabaseHelper {
         mDatabase.child("lists").child(idList).child("items").child(item.getKey()).child("checked").setValue(!item.isChecked());
     }
 
+    public void setImageItem(String idList, Item item) {
+        mDatabase.child("lists").child(idList).child("items").child(item.getKey()).child("imageUrl").setValue(item.getImageUrl());
+    }
+
 
 }
 

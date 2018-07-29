@@ -1,5 +1,7 @@
 package com.udacity.surbi.listnow.data;
 
+import android.graphics.Bitmap;
+
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -37,6 +39,8 @@ public class Item {
     private Boolean rejected;
     @JsonProperty("checked")
     private Boolean checked;
+    @JsonIgnore
+    private Bitmap bitmap;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -118,6 +122,16 @@ public class Item {
     @JsonProperty("checked")
     public void setChecked(Boolean checked) {
         this.checked = checked;
+    }
+
+    @JsonProperty("bitmap")
+    public Bitmap getBitmap() {
+        return bitmap;
+    }
+
+    @JsonProperty("bitmap")
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
     }
 
     @JsonAnyGetter

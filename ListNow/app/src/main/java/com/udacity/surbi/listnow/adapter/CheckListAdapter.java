@@ -11,6 +11,8 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.udacity.surbi.listnow.R;
 import com.udacity.surbi.listnow.data.Item;
 
@@ -83,7 +85,22 @@ public class CheckListAdapter extends RecyclerView.Adapter<CheckListAdapter.View
         //image
         if (currentItem.getImage()) {
             holder.ivUploadImage.setVisibility(View.VISIBLE);
-            holder.ivUploadImage.setImageResource(R.drawable.circle_background);
+            if (currentItem.getBitmap() != null){
+                holder.ivUploadImage.setImageBitmap(currentItem.getBitmap());
+
+            } else if (currentItem.getImageUrl() != null){
+                Glide.with(context)
+                        .load(currentItem.getImageUrl())
+                        .apply(new RequestOptions()
+                                .placeholder(R.drawable.ic_more_vert_black_24dp)
+                                .centerCrop()
+                                .dontAnimate()
+                                .dontTransform())
+                        .into(holder.ivUploadImage);
+
+            }else {
+                holder.ivUploadImage.setImageResource(R.drawable.ic_more_vert_black_24dp);
+            }
         } else {
             holder.ivUploadImage.setVisibility(View.GONE);
         }
@@ -115,6 +132,13 @@ public class CheckListAdapter extends RecyclerView.Adapter<CheckListAdapter.View
             @Override
             public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
                 listener.onCheck(currentItem);
+            }
+        });
+
+        holder.ivUploadImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.selectImage(currentItem);
             }
         });
     }

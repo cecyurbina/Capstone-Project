@@ -1,10 +1,13 @@
 package com.udacity.surbi.listnow.fragment;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -20,14 +23,24 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.udacity.surbi.listnow.R;
 import com.udacity.surbi.listnow.activity.NewItemActivity;
 import com.udacity.surbi.listnow.adapter.CheckListAdapter;
@@ -44,6 +57,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
+import static android.app.Activity.RESULT_OK;
 import static android.view.View.GONE;
 
 /**
@@ -64,6 +78,7 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     public static final int CODE_RESULT_EDIT = 101;
     public static final String KEY_RESULT_ITEM = "key_result_item";
     private static final int error_not_found = -1;
+    private static final int PICK_IMAGE_REQUEST = 222;
 
     ValueEventListener mValueEventListener;
     DatabaseReference mDatabaseReference;
@@ -88,9 +103,16 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     private String mParam1;
     private String mParam2;
     private String key;
+    private String currentKeyItemImage;
+    private Bitmap currentBitmap;
+
     DatabaseHelper databaseHelper = new DatabaseHelper();
+    private Uri filePath;
 
     private OnFragmentInteractionListener mListener;
+    private StorageReference storageReference;
+    private boolean isTaskRunning = false;
+    private ProgressDialog progressDialog;
 
     public NewListFragment() {
         // Required empty public constructor
@@ -150,6 +172,9 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         View view = inflater.inflate(R.layout.fragment_new_list, container, false);
         databaseHelper = new DatabaseHelper();
         mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("lists").child(key).child("items");
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
+
         unbinder = ButterKnife.bind(this, view);
 
         mLayoutManager = new LinearLayoutManager(getContext());
@@ -207,6 +232,9 @@ public class NewListFragment extends Fragment implements PreviewListListener {
 
     @Override
     public void onDetach() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
         super.onDetach();
         mListener = null;
     }
@@ -243,6 +271,15 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     public void onCheck(Item item) {
         databaseHelper.checkItem(key, item);
         updateProgressBar();
+    }
+
+    @Override
+    public void selectImage(Item item) {
+        currentKeyItemImage = item.getKey();
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select an image"), PICK_IMAGE_REQUEST);
     }
 
     private void onListRejectClicked(Item item) {
@@ -313,16 +350,16 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (data != null) {
-            String result = data.getStringExtra(KEY_RESULT_ITEM);
-            ObjectMapper mapper = new ObjectMapper();
-            Item obj = new Item();
-            try {
-                obj = mapper.readValue(result, Item.class);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             if (requestCode == CODE_RESULT_NEW) {
-                if (resultCode == Activity.RESULT_OK) {
+                String result = data.getStringExtra(KEY_RESULT_ITEM);
+                ObjectMapper mapper = new ObjectMapper();
+                Item obj = new Item();
+                try {
+                    obj = mapper.readValue(result, Item.class);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (resultCode == RESULT_OK) {
                     myDataset.add(obj);
                     showData();
                     mAdapter.notifyDataSetChanged();
@@ -331,7 +368,15 @@ public class NewListFragment extends Fragment implements PreviewListListener {
                     //Write your code if there's no result
                 }
             } else if (requestCode == CODE_RESULT_EDIT) {
-                if (resultCode == Activity.RESULT_OK) {
+                String result = data.getStringExtra(KEY_RESULT_ITEM);
+                ObjectMapper mapper = new ObjectMapper();
+                Item obj = new Item();
+                try {
+                    obj = mapper.readValue(result, Item.class);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (resultCode == RESULT_OK) {
                     int positionToUpdate = findPositionById(obj.getKey());
                     if (positionToUpdate != error_not_found) {
                         myDataset.set(positionToUpdate, obj);
@@ -341,6 +386,20 @@ public class NewListFragment extends Fragment implements PreviewListListener {
 
                 if (resultCode == Activity.RESULT_CANCELED) {
                     //Write your code if there's no result
+                }
+            } else if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data.getData() != null){
+                filePath = data.getData();
+                uploadFile();
+                try {
+                    currentBitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), filePath);
+                    int positionToUpdate = findPositionById(currentKeyItemImage);
+                    if (positionToUpdate != error_not_found){
+                        myDataset.get(positionToUpdate).setBitmap(currentBitmap);
+                        mAdapter.notifyDataSetChanged();
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -383,6 +442,12 @@ public class NewListFragment extends Fragment implements PreviewListListener {
                     item.setImageUrl((String) childDataSnapshot.child("imageUrl").getValue());
                     item.setRejected((Boolean) childDataSnapshot.child("rejected").getValue());
                     item.setChecked((Boolean) childDataSnapshot.child("checked").getValue());
+                    if (currentKeyItemImage != null){
+                        if (item.getKey().endsWith(currentKeyItemImage)){
+                            item.setBitmap(currentBitmap);
+                        }
+                    }
+
                     myDataset.add(item);
                 }
                 mAdapter.notifyDataSetChanged();
@@ -425,4 +490,98 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         }
 
     }
+
+    //this method will upload the file
+    private void uploadFile() {
+        //if there is a file to upload
+        if (filePath != null) {
+            //displaying a progress dialog while upload is going on
+            int index = filePath.toString().lastIndexOf("\\");
+            String fileName = filePath.toString().substring(index + 1);
+            progressDialog = new ProgressDialog(getActivity());
+            progressDialog.setTitle("Uploading");
+            progressDialog.show();
+
+            final StorageReference riversRef = storageReference.child("images/"+fileName);
+            UploadTask uploadTask = riversRef.putFile(filePath);
+            isTaskRunning = true;
+
+            uploadTask
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            progressDialog.dismiss();
+                            isTaskRunning = false;
+                            Toast.makeText(getContext(), "File Uploaded ", Toast.LENGTH_LONG).show();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            progressDialog.dismiss();
+                            isTaskRunning = false;
+                            Toast.makeText(getContext(), exception.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    })
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            //calculating progress percentage
+                            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+
+                            //displaying percentage in progress dialog
+                            progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
+                        }
+                    });
+
+
+            Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if (!task.isSuccessful()) {
+                        throw task.getException();
+                    }
+
+                    // Continue with the task to get the download URL
+                    return riversRef.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if (task.isSuccessful()) {
+                        Uri downloadUri = task.getResult();
+                        int position = findPositionById(currentKeyItemImage);
+                        if (position != error_not_found) {
+                            Item item = myDataset.get(position);
+                            item.setImageUrl(downloadUri.toString());
+                            databaseHelper.setImageItem(key, item);
+                            currentBitmap = null;
+                            currentKeyItemImage = null;
+                        }
+
+
+                    } else {
+                        // Handle failures
+                        // ...
+                    }
+                }
+            });
+
+
+
+        }
+        //if there is not any file
+        else {
+            //you can display an error toast
+        }
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (isTaskRunning) {
+            progressDialog = ProgressDialog.show(getActivity(), "Loading", "Please wait a moment!");
+        }
+    }
+
 }

@@ -7,4 +7,5 @@ import com.udacity.surbi.listnow.data.Item;
 public interface PreviewListListener {
     void onSelectedItem(Item item, View view);
     void onCheck(Item item);
+    void selectImage(Item item);
 }

@@ -165,6 +165,11 @@ public class CheckListFragment extends Fragment implements PreviewListListener {
 
     }
 
+    @Override
+    public void selectImage(Item item) {
+
+    }
+
     private void onListRejectClicked(MenuItem item) {
     }
 
