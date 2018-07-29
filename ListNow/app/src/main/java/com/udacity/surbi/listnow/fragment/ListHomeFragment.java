@@ -17,6 +17,8 @@ import android.view.ViewGroup;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -58,7 +60,8 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     private RecyclerView.LayoutManager mLayoutManager;
     List<ListStructure> myDataset = new ArrayList<>();
     DatabaseHelper mDatabaseHelper;
-
+    FirebaseUser currentUser;
+    private FirebaseAuth mAuth;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -97,6 +100,8 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+        mAuth = FirebaseAuth.getInstance();
+
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -301,6 +306,7 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     @Override
     public void onStart() {
         super.onStart();
+        currentUser = mAuth.getCurrentUser();
 
         ValueEventListener valueEventListener = new ValueEventListener() {
             @Override
@@ -313,7 +319,14 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
                     listStructure.setCompleted((Boolean) childDataSnapshot.child("completed").getValue());
                     listStructure.setFavorite((Boolean) childDataSnapshot.child("favorite").getValue());
                     listStructure.setDataSnapshot(childDataSnapshot.child("items"));
-                    myDataset.add(listStructure);
+                    DataSnapshot usersData = childDataSnapshot.child("users");
+                    for (DataSnapshot userData: usersData.getChildren()){
+                        String tempUser = (String) userData.getValue();
+                        if (tempUser.equals(currentUser.getUid())){
+                            myDataset.add(listStructure);
+                            break;
+                        }
+                    }
                 }
                 mAdapter.notifyDataSetChanged();
             }

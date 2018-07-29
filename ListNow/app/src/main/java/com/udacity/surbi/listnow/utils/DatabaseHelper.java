@@ -2,11 +2,15 @@ package com.udacity.surbi.listnow.utils;
 
 import android.provider.ContactsContract;
 
+import com.google.android.gms.common.util.Strings;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.udacity.surbi.listnow.data.Item;
 import com.udacity.surbi.listnow.data.ListStructure;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DatabaseHelper {
@@ -20,13 +24,16 @@ public class DatabaseHelper {
      * CREATE LIST
      * @return id
      */
-    public ListStructure createList() {
+    public ListStructure createList(String userId) {
         String key = mDatabase.child("lists").push().getKey();
         ListStructure listStructure = new ListStructure();
         listStructure.setName("New list");
         listStructure.setFavorite(false);
         listStructure.setCompleted(false);
         listStructure.setId(key);
+        List<String> users = new ArrayList<>();
+        users.add(userId);
+        listStructure.setUsers(users);
         mDatabase.child("lists").child(key).setValue(listStructure);
         return listStructure;
     }

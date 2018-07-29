@@ -32,6 +32,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -105,6 +107,9 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     private String key;
     private String currentKeyItemImage;
     private Bitmap currentBitmap;
+    FirebaseUser currentUser;
+    private FirebaseAuth mAuth;
+
 
     DatabaseHelper databaseHelper = new DatabaseHelper();
     private Uri filePath;
@@ -133,6 +138,7 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
+
         return fragment;
     }
 
@@ -140,6 +146,9 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+        // [START initialize_auth]
+        mAuth = FirebaseAuth.getInstance();
+        // [END initialize_auth]
         //if (savedInstanceState == null) {
         //    DatabaseHelper databaseHelper = new DatabaseHelper();
         //} else {
@@ -149,11 +158,14 @@ public class NewListFragment extends Fragment implements PreviewListListener {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        currentUser = mAuth.getCurrentUser();
+
         ObjectMapper mapper = new ObjectMapper();
         try {
             if (mListener != null) {
                 if (mListener.getList() == null) {
-                    listStructure = databaseHelper.createList();
+                    listStructure = databaseHelper.createList(currentUser.getUid());
                     key = listStructure.getId();
                 } else {
                     listStructure = mapper.readValue(mListener.getList(), ListStructure.class);
@@ -164,6 +176,7 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     @Override
@@ -171,6 +184,8 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_new_list, container, false);
         databaseHelper = new DatabaseHelper();
+
+
         mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("lists").child(key).child("items");
         FirebaseStorage storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
