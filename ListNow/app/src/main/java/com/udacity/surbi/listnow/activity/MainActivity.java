@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -28,14 +29,29 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.udacity.surbi.listnow.data.ListStructure;
 import com.udacity.surbi.listnow.fragment.EmptyHomeFragment;
 import com.udacity.surbi.listnow.fragment.ListHomeFragment;
 import com.udacity.surbi.listnow.R;
+import com.udacity.surbi.listnow.fragment.RenameDialogFragment;
+import com.udacity.surbi.listnow.fragment.SearchDialogFragment;
+import com.udacity.surbi.listnow.utils.DatabaseHelper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
-        NavigationView.OnNavigationItemSelectedListener, EmptyHomeFragment.OnFragmentInteractionListener, ListHomeFragment.OnFragmentInteractionListener {
+        NavigationView.OnNavigationItemSelectedListener, EmptyHomeFragment.OnFragmentInteractionListener,
+        ListHomeFragment.OnFragmentInteractionListener, SearchDialogFragment.SearchDialogListener {
     // [START declare_auth]
     private FirebaseAuth mAuth;
+    FirebaseUser currentUser;
+
     // [END declare_auth]
 
     private GoogleSignInClient mGoogleSignInClient;
@@ -62,7 +78,6 @@ public class MainActivity extends AppCompatActivity implements
         // [END config_signin]
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-
         // [START initialize_auth]
         mAuth = FirebaseAuth.getInstance();
         // [END initialize_auth]
@@ -153,45 +168,10 @@ public class MainActivity extends AppCompatActivity implements
      * Show dialog to enter new name
      */
     private void showSearchDialog() {
-        if (MainActivity.this != null) {
-            final Button buttonAccept;
-            final EditText etNewName = new EditText(MainActivity.this);
-            etNewName.setHint(getString(R.string.action_search_id));
-
-            AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this).setTitle(getString(R.string.dialog_search_title)).setView(etNewName).setPositiveButton(getString(R.string.accept), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    showToast(true);
-                }
-            }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                }
-            });
-            buttonAccept = dialog.show().getButton(AlertDialog.BUTTON_POSITIVE);
-            //disable accept if input is empty
-            buttonAccept.setEnabled(false);
-
-            //validate empty list name
-            etNewName.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    //enable button if input is not empty
-                    if (etNewName.getText().length() > 0) {
-                        buttonAccept.setEnabled(true);
-                    } else {
-                        buttonAccept.setEnabled(false);
-                    }
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-
-                }
-            });
-        }
+        FragmentManager fm = getSupportFragmentManager();
+        SearchDialogFragment alertDialog = SearchDialogFragment.newInstance();
+        //alertDialog.setTargetFragment(ListHomeFragment.this, 201);
+        alertDialog.show(fm, "fragment_alert");
     }
 
     private void showToast(boolean success){
@@ -227,10 +207,43 @@ public class MainActivity extends AppCompatActivity implements
     public void onStart() {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
+        currentUser = mAuth.getCurrentUser();
         if(currentUser == null){
             showLoginScreen();
         }
     }
     // [END on_start_check_user]
+
+
+    @Override
+    public void onFinishSearchDialog(final String inputText) {
+        final DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference ref = database.child("lists").child(inputText);
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getChildrenCount() > 0){
+                    Toast.makeText(getApplicationContext(), "added",
+                            Toast.LENGTH_LONG).show();
+                    DataSnapshot usersData = dataSnapshot.child(inputText).child("users");
+                    List<String> newUser = new ArrayList<>();
+                    for (DataSnapshot userData: usersData.getChildren()){
+                        String tempUser = (String) userData.getValue();
+                        newUser.add(tempUser);
+                    }
+                    newUser.add(currentUser.getUid());
+                    DatabaseHelper databaseHelper = new DatabaseHelper();
+                    databaseHelper.addUserList(newUser, inputText);
+                } else {
+                    Toast.makeText(getApplicationContext(), "not found",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
 }

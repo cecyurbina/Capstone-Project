@@ -117,5 +117,8 @@ public class DatabaseHelper {
     }
 
 
+    public void addUserList(List<String> users, String inputText) {
+        mDatabase.child("lists").child(inputText).child("users").setValue(users);
+    }
 }
 
