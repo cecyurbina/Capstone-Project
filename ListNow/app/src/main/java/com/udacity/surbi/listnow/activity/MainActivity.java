@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -20,13 +21,24 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.udacity.surbi.listnow.fragment.EmptyHomeFragment;
 import com.udacity.surbi.listnow.fragment.ListHomeFragment;
 import com.udacity.surbi.listnow.R;
 
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener, EmptyHomeFragment.OnFragmentInteractionListener, ListHomeFragment.OnFragmentInteractionListener {
+    // [START declare_auth]
+    private FirebaseAuth mAuth;
+    // [END declare_auth]
 
+    private GoogleSignInClient mGoogleSignInClient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +53,19 @@ public class MainActivity extends AppCompatActivity implements
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+// [START config_signin]
+        // Configure Google Sign In
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        // [END config_signin]
 
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        // [START initialize_auth]
+        mAuth = FirebaseAuth.getInstance();
+        // [END initialize_auth]
         // Check that the activity is using the layout version with
         // the fragment_container FrameLayout
         if (findViewById(R.id.fragment_container) != null) {
@@ -112,6 +136,7 @@ public class MainActivity extends AppCompatActivity implements
                 showSearchDialog();
                 break;
             case R.id.nav_logout:
+                signOut();
                 break;
         }
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -176,4 +201,36 @@ public class MainActivity extends AppCompatActivity implements
         Toast toast = Toast.makeText(context, message, duration);
         toast.show();
     }
+
+    private void signOut() {
+        // Firebase sign out
+        mAuth.signOut();
+
+        // Google sign out
+        mGoogleSignInClient.signOut().addOnCompleteListener(this,
+                new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                       showLoginScreen();
+                    }
+                });
+    }
+
+    private void showLoginScreen() {
+        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+        startActivity(intent);
+
+    }
+
+    // [START on_start_check_user]
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if(currentUser == null){
+            showLoginScreen();
+        }
+    }
+    // [END on_start_check_user]
 }

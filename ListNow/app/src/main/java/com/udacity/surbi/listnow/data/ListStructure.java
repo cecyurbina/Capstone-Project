@@ -36,6 +36,8 @@ public class ListStructure implements Cloneable {
     private Boolean favorite = false;
     @JsonProperty("items")
     private List<Item> items = null;
+    @JsonProperty("users")
+    private List<String> users = null;
     @JsonIgnore
     private DataSnapshot dataSnapshot = null;
     @JsonIgnore
@@ -99,6 +101,16 @@ public class ListStructure implements Cloneable {
     @JsonProperty("items")
     public void setItems(List<Item> items) {
         this.items = items;
+    }
+
+    @JsonProperty("users")
+    public List<String> getUsers() {
+        return users;
+    }
+
+    @JsonProperty("users")
+    public void setUsers(List<String> users) {
+        this.users = users;
     }
 
     @JsonAnyGetter
