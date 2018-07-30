@@ -18,11 +18,13 @@
         android:text="@string/home_label_2" />
 
     <Button
+        android:id="@+id/button_new_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/home_new_list" />
 
     <Button
+        android:id="@+id/button_search"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="100dp"

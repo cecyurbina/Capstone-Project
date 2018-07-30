@@ -4,12 +4,15 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 
 import com.udacity.surbi.listnow.R;
+
+import java.util.Objects;
 
 
 public class SearchDialogFragment extends DialogFragment {
@@ -35,16 +38,17 @@ public class SearchDialogFragment extends DialogFragment {
             newName = savedInstanceState.getString(KEY_NEW_NAME);
         }
     }
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        String title = "Search";
+        String title = getString(R.string.dialog_search_title);
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
         etNewName = new EditText(getContext());
-        etNewName.setHint(getString(R.string.home_dialog_rename_new_name));
+        etNewName.setHint(getString(R.string.home_search_enter));
         if (newName != null){
             etNewName.setText(newName);
         }
-        FrameLayout container = new FrameLayout(getContext());
+        FrameLayout container = new FrameLayout(Objects.requireNonNull(getContext()));
         FrameLayout.LayoutParams params = new  FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMarginStart(getResources().getDimensionPixelSize(R.dimen.dialog_margin));
         params.setMarginEnd(getResources().getDimensionPixelSize(R.dimen.dialog_margin));
@@ -64,7 +68,7 @@ public class SearchDialogFragment extends DialogFragment {
                     }
                     dismiss();
                 } else {
-                    etNewName.setHint(getString(R.string.home_dialog_rename_new_name_please));
+                    etNewName.setHint(getString(R.string.home_search_enter));
                 }
 
             }

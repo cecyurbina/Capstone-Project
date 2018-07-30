@@ -17,6 +17,7 @@
     <string name="home_label_2">Let us begin!</string>
     <string name="home_new_list">New list</string>
     <string name="home_search">Search list</string>
+    <string name="home_search_enter">Please! Enter id list</string>
     <string name="home_item_list_img_description">Item list</string>
     <string name="home_item_list_img_description_more">More actions</string>
     <string name="home_list_action_empty_copy">Empty copy</string>
@@ -32,6 +33,8 @@
     <string name="home_list_status_completed">Completed</string>
     <string name="home_list_status_pending">Pending</string>
     <string name="home_list_copy_added_to_name">copy</string>
+    <string name="home_list_added">List added</string>
+    <string name="home_list_not_foud">List not found</string>
 
     <string name="check_list_reject">Rejected! Please choose another</string>
     <string name="check_list_action_edit">Edit</string>

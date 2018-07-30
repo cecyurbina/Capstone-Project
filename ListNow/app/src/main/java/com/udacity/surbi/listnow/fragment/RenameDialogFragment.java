@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -35,22 +36,27 @@ public class RenameDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState!=null) {
+        if (savedInstanceState != null) {
             newName = savedInstanceState.getString(KEY_NEW_NAME);
         }
     }
+
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        String title = getArguments().getString(KEY_TITLE);
-        final String id = getArguments().getString(KEY_ID);
+        if (getArguments() == null) {
+            return new AlertDialog.Builder(getActivity()).create();
+        }
+        String title = getArguments().getString(KEY_TITLE, "");
+        final String id = getArguments().getString(KEY_ID, "");
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
         etNewName = new EditText(getContext());
         etNewName.setHint(getString(R.string.home_dialog_rename_new_name));
-        if (newName != null){
+        if (newName != null) {
             etNewName.setText(newName);
         }
         FrameLayout container = new FrameLayout(getContext());
-        FrameLayout.LayoutParams params = new  FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMarginStart(getResources().getDimensionPixelSize(R.dimen.dialog_margin));
         params.setMarginEnd(getResources().getDimensionPixelSize(R.dimen.dialog_margin));
 
@@ -59,7 +65,7 @@ public class RenameDialogFragment extends DialogFragment {
         alertDialogBuilder.setTitle(title);
         alertDialogBuilder.setView(container);
 
-        alertDialogBuilder.setPositiveButton(getString(R.string.accept),  new DialogInterface.OnClickListener() {
+        alertDialogBuilder.setPositiveButton(getString(R.string.accept), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (etNewName.getText().toString().length() > 0) {

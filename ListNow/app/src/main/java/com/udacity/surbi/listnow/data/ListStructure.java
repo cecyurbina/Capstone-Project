@@ -3,6 +3,7 @@ package com.udacity.surbi.listnow.data;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -13,14 +14,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-        "id",
-        "name",
-        "owner",
-        "completed",
-        "favorite",
-        "items"
-})
+@JsonPropertyOrder({"id", "name", "owner", "completed", "favorite", "items"})
 @IgnoreExtraProperties
 public class ListStructure implements Cloneable {
 

@@ -1,10 +1,7 @@
 package com.udacity.surbi.listnow.fragment;
 
-import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -36,6 +33,7 @@ import com.udacity.surbi.listnow.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -53,26 +51,17 @@ import butterknife.Unbinder;
 public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSelectedListener, RenameDialogFragment.RenameDialogListener {
     public static final String KEY_LIST_JSON = "key_list_json";
     private static final int error_not_found = -1;
-
     @BindView(R.id.rv_list)
     RecyclerView rvList;
-    private Unbinder unbinder;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
     List<ListStructure> myDataset = new ArrayList<>();
     DatabaseHelper mDatabaseHelper;
     FirebaseUser currentUser;
-    private FirebaseAuth mAuth;
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
     ValueEventListener mValueEventListener;
     DatabaseReference mDatabaseReference;
+    private Unbinder unbinder;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+    private FirebaseAuth mAuth;
     private OnFragmentInteractionListener mListener;
 
     public ListHomeFragment() {
@@ -82,18 +71,10 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     /**
      * Use this factory method to create mValueEventListener new instance of
      * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment ListHomeFragment.
      */
-    // TODO: Rename and change types and number of parameters
-    public static ListHomeFragment newInstance(String param1, String param2) {
+    public static ListHomeFragment newInstance() {
         ListHomeFragment fragment = new ListHomeFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
         return fragment;
     }
 
@@ -102,16 +83,10 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         mAuth = FirebaseAuth.getInstance();
-
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_list_home, container, false);
         mDatabaseHelper = new DatabaseHelper();
         mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("lists");
@@ -174,11 +149,8 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.list_empty_copy:
-                        onCopyMenuClicked(itemList, true);
-                        break;
                     case R.id.list_copy:
-                        onCopyMenuClicked(itemList, false);
+                        onCopyMenuClicked(itemList);
                         break;
                     case R.id.list_share:
                         onShareMenuClicked(itemList);
@@ -215,22 +187,7 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
 
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <mValueEventListener href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</mValueEventListener> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
-
-    private void onCopyMenuClicked(ListStructure itemList, boolean isEmpty) {
+    private void onCopyMenuClicked(ListStructure itemList) {
         setItemsOnList(itemList);
         myDataset.add(mDatabaseHelper.copyList(itemList, currentUser.getUid()));
         mAdapter.notifyDataSetChanged();
@@ -305,7 +262,10 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     public void onStart() {
         super.onStart();
         currentUser = mAuth.getCurrentUser();
+        startEventDBListener();
+    }
 
+    private void startEventDBListener() {
         ValueEventListener valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -321,14 +281,20 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
                         DataSnapshot usersData = childDataSnapshot.child("users");
                         for (DataSnapshot userData : usersData.getChildren()) {
                             String tempUser = (String) userData.getValue();
-                            if (tempUser.equals(currentUser.getUid())) {
-                                myDataset.add(listStructure);
-                                break;
+                            if (tempUser != null) {
+                                if (tempUser.equals(currentUser.getUid())) {
+                                    myDataset.add(listStructure);
+                                    break;
+                                }
                             }
                         }
                     }
                 }
                 mAdapter.notifyDataSetChanged();
+
+                if (myDataset.isEmpty()) {
+                    mListener.showEmptyMessage();
+                }
             }
 
             @Override
@@ -338,19 +304,22 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
         };
         mDatabaseReference.addValueEventListener(valueEventListener);
         mValueEventListener = valueEventListener;
-
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (mValueEventListener != null){
-            mDatabaseReference.removeEventListener(mValueEventListener);
-        }
+        removeListenerDB();
 
     }
 
-    private void setItemsOnList(ListStructure listStructure){
+    private void removeListenerDB() {
+        if (mValueEventListener != null) {
+            mDatabaseReference.removeEventListener(mValueEventListener);
+        }
+    }
+
+    private void setItemsOnList(ListStructure listStructure) {
         List<Item> items = new ArrayList<>();
 
         for (DataSnapshot childDataSnapshot : listStructure.getDataSnapshot().getChildren()) {
@@ -360,7 +329,7 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
             item2.setImage((Boolean) childDataSnapshot.child("image").getValue());
             item2.setChecked((Boolean) childDataSnapshot.child("checked").getValue());
             if (childDataSnapshot.child("quantity").getValue() != null) {
-                item2.setQuantity(((Long) childDataSnapshot.child("quantity").getValue()).intValue());
+                item2.setQuantity(((Long) Objects.requireNonNull(childDataSnapshot.child("quantity").getValue())).intValue());
             }
             item2.setUnit((String) childDataSnapshot.child("unit").getValue());
             item2.setRejected((Boolean) childDataSnapshot.child("rejected").getValue());
@@ -371,13 +340,29 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     }
 
     private void showAlertDialog(ListStructure listStructure) {
-        FragmentManager fm = getActivity().getSupportFragmentManager();
-        RenameDialogFragment alertDialog = RenameDialogFragment.newInstance(getString(R.string.home_dialog_rename_title, listStructure.getName()), listStructure.getId());
-        alertDialog.setTargetFragment(ListHomeFragment.this, 200);
-        alertDialog.show(fm, "fragment_alert");
+        if (getActivity() != null) {
+            FragmentManager fm = getActivity().getSupportFragmentManager();
+            RenameDialogFragment alertDialog = RenameDialogFragment.newInstance(getString(R.string.home_dialog_rename_title, listStructure.getName()), listStructure.getId());
+            alertDialog.setTargetFragment(ListHomeFragment.this, 200);
+            alertDialog.show(fm, "fragment_alert");
+        }
     }
 
     private void updateWidget() {
         Utils.updateWidget(getContext());
+    }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <mValueEventListener href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</mValueEventListener> for more information.
+     */
+    public interface OnFragmentInteractionListener {
+        void showEmptyMessage();
     }
 }
