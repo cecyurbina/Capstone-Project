@@ -27,16 +27,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.udacity.surbi.listnow.R;
-import com.udacity.surbi.listnow.activity.CheckListContainerActivity;
 import com.udacity.surbi.listnow.activity.NewListActivity;
 import com.udacity.surbi.listnow.adapter.ListAdapter;
 import com.udacity.surbi.listnow.data.Item;
 import com.udacity.surbi.listnow.data.ListStructure;
 import com.udacity.surbi.listnow.utils.DatabaseHelper;
 import com.udacity.surbi.listnow.utils.Utils;
-import com.udacity.surbi.listnow.widget.AppWidget;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 

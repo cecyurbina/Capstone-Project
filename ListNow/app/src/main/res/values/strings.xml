@@ -11,6 +11,8 @@
     <string name="drawer_search">Search</string>
     <string name="login_app_name">List now!</string>
     <string name="login_sign_in_google">Sign in with Google</string>
+    <string name="login_progress">Login progress</string>
+    <string name="login_progress_loading">Loading, please wait.</string>
     <string name="home_label_1">You do not have any list</string>
     <string name="home_label_2">Let us begin!</string>
     <string name="home_new_list">New list</string>
