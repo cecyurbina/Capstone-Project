@@ -51,6 +51,10 @@
     <string name="dialog_search_title">Search</string>
     <string name="search_success">List added successfully</string>
     <string name="search_fail">List not found</string>
+    <string name="pick_image">Select an imaeg</string>
+    <string name="uploading_image">Uploading ...</string>
+    <string name="uploaded_image">File uploaded</string>
+    <string name="uploaded_image_error">Upload error</string>
 
 
     <string name="accept">Accept</string>

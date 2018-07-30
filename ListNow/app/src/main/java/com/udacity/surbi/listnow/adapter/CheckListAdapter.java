@@ -25,29 +25,6 @@ public class CheckListAdapter extends RecyclerView.Adapter<CheckListAdapter.View
     private List<Item> mDataset;
     private PreviewListListener listener;
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.cl_item_check_list)
-        View viewItem;
-        @BindView(R.id.tv_name)
-        TextView tvName;
-        @BindView(R.id.tv_quantity)
-        TextView tvQuantity;
-        @BindView(R.id.tv_unit)
-        TextView tvUnit;
-        @BindView(R.id.iv_upload_image)
-        ImageView ivUploadImage;
-        @BindView(R.id.tv_reject)
-        TextView tvReject;
-        @BindView(R.id.checkBox)
-        CheckBox cbCheck;
-
-
-        public ViewHolder(View v) {
-            super(v);
-            ButterKnife.bind(this, v);
-        }
-    }
-
     public CheckListAdapter(List<Item> myDataset, PreviewListListener onItemSelectedListener) {
         mDataset = myDataset;
         listener = onItemSelectedListener;
@@ -85,21 +62,14 @@ public class CheckListAdapter extends RecyclerView.Adapter<CheckListAdapter.View
         //image
         if (currentItem.getImage()) {
             holder.ivUploadImage.setVisibility(View.VISIBLE);
-            if (currentItem.getBitmap() != null){
+            if (currentItem.getBitmap() != null) {
                 holder.ivUploadImage.setImageBitmap(currentItem.getBitmap());
 
-            } else if (currentItem.getImageUrl() != null){
-                Glide.with(context)
-                        .load(currentItem.getImageUrl())
-                        .apply(new RequestOptions()
-                                .placeholder(R.drawable.ic_more_vert_black_24dp)
-                                .centerCrop()
-                                .dontAnimate()
-                                .dontTransform())
-                        .into(holder.ivUploadImage);
+            } else if (currentItem.getImageUrl() != null) {
+                Glide.with(context).load(currentItem.getImageUrl()).apply(new RequestOptions().placeholder(R.drawable.ic_file_upload_black_24dp).centerCrop().dontAnimate().dontTransform()).into(holder.ivUploadImage);
 
-            }else {
-                holder.ivUploadImage.setImageResource(R.drawable.ic_more_vert_black_24dp);
+            } else {
+                holder.ivUploadImage.setImageResource(R.drawable.ic_file_upload_black_24dp);
             }
         } else {
             holder.ivUploadImage.setVisibility(View.GONE);
@@ -130,7 +100,7 @@ public class CheckListAdapter extends RecyclerView.Adapter<CheckListAdapter.View
 
         holder.cbCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 listener.onCheck(currentItem);
             }
         });
@@ -146,6 +116,29 @@ public class CheckListAdapter extends RecyclerView.Adapter<CheckListAdapter.View
     @Override
     public int getItemCount() {
         return mDataset.size();
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.cl_item_check_list)
+        View viewItem;
+        @BindView(R.id.tv_name)
+        TextView tvName;
+        @BindView(R.id.tv_quantity)
+        TextView tvQuantity;
+        @BindView(R.id.tv_unit)
+        TextView tvUnit;
+        @BindView(R.id.iv_upload_image)
+        ImageView ivUploadImage;
+        @BindView(R.id.tv_reject)
+        TextView tvReject;
+        @BindView(R.id.checkBox)
+        CheckBox cbCheck;
+
+
+        public ViewHolder(View v) {
+            super(v);
+            ButterKnife.bind(this, v);
+        }
     }
 
 

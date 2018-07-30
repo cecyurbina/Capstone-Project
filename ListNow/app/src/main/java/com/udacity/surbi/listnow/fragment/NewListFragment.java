@@ -55,6 +55,7 @@ import com.udacity.surbi.listnow.utils.Utils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -75,21 +76,11 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     public static final String KEY_LIST_ID = "key_list_id";
     public static final String KEY_ITEM = "key_item";
     public static final String KEY_EDITION = "key_edition";
-
-
     public static final int CODE_RESULT_NEW = 100;
     public static final int CODE_RESULT_EDIT = 101;
     public static final String KEY_RESULT_ITEM = "key_result_item";
     private static final int error_not_found = -1;
     private static final int PICK_IMAGE_REQUEST = 222;
-
-    ValueEventListener mValueEventListener;
-    DatabaseReference mDatabaseReference;
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-    private ListStructure listStructure;
     @BindView(R.id.tv_empty_message)
     TextView tvMessage;
     @BindView(R.id.rv_structure_list)
@@ -98,21 +89,17 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     FloatingActionButton floatingActionButton;
     @BindView(R.id.progressBar)
     ProgressBar progressBar;
+    List<Item> myDataset = new ArrayList<>();
+    ValueEventListener mValueEventListener;
+    DatabaseReference mDatabaseReference;
+    FirebaseUser currentUser;
+    DatabaseHelper databaseHelper = new DatabaseHelper();
+    private ListStructure listStructure;
     private Unbinder unbinder;
     private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
-    List<Item> myDataset = new ArrayList<>();
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
     private String key;
     private String currentKeyItemImage;
     private Bitmap currentBitmap;
-    FirebaseUser currentUser;
-    private FirebaseAuth mAuth;
-
-
-    DatabaseHelper databaseHelper = new DatabaseHelper();
     private Uri filePath;
 
     private OnFragmentInteractionListener mListener;
@@ -127,41 +114,18 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     /**
      * Use this factory method to create mValueEventListener new instance of
      * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment NewListFragment.
      */
-    // TODO: Rename and change types and number of parameters
-    public static NewListFragment newInstance(String param1, String param2) {
-        NewListFragment fragment = new NewListFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-
-        return fragment;
+    public static NewListFragment newInstance() {
+        return new NewListFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        // [START initialize_auth]
-        mAuth = FirebaseAuth.getInstance();
-        // [END initialize_auth]
-        //if (savedInstanceState == null) {
-        //    DatabaseHelper databaseHelper = new DatabaseHelper();
-        //} else {
-        //    key = savedInstanceState.getString(KEY_LIST_ID);
-        //}
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
-
         ObjectMapper mapper = new ObjectMapper();
         try {
             if (mListener != null) {
@@ -181,22 +145,17 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     }
 
     @Override
-    public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_new_list, container, false);
         databaseHelper = new DatabaseHelper();
-
-
         mDatabaseReference = FirebaseDatabase.getInstance().getReference().child("lists").child(key).child("items");
         FirebaseStorage storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
-
         unbinder = ButterKnife.bind(this, view);
-
-        mLayoutManager = new LinearLayoutManager(getContext());
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         rvList.setLayoutManager(mLayoutManager);
         rvList.addItemDecoration(new DividerItemDecoration(rvList.getContext(), DividerItemDecoration.VERTICAL));
-
         mAdapter = new CheckListAdapter(myDataset, this);
         rvList.setAdapter(mAdapter);
 
@@ -212,7 +171,9 @@ public class NewListFragment extends Fragment implements PreviewListListener {
             }
         });
 
-        getActivity().setTitle(listStructure.getName());
+        if (getActivity() != null) {
+            getActivity().setTitle(listStructure.getName());
+        }
         return view;
     }
 
@@ -226,13 +187,6 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         } else {
             tvMessage.setVisibility(View.VISIBLE);
             rvList.setVisibility(View.GONE);
-        }
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
         }
     }
 
@@ -295,7 +249,7 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select an image"), PICK_IMAGE_REQUEST);
+        startActivityForResult(Intent.createChooser(intent, getString(R.string.pick_image)), PICK_IMAGE_REQUEST);
     }
 
     private void onListRejectClicked(Item item) {
@@ -330,26 +284,6 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         }
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <mValueEventListener href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</mValueEventListener> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-
-        String getList();
-
-        boolean isNewList();
-
-    }
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -357,7 +291,7 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(KEY_LIST_ID, key);
     }
@@ -403,13 +337,13 @@ public class NewListFragment extends Fragment implements PreviewListListener {
                 if (resultCode == Activity.RESULT_CANCELED) {
                     //Write your code if there's no result
                 }
-            } else if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data.getData() != null){
+            } else if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data.getData() != null) {
                 filePath = data.getData();
                 uploadFile();
                 try {
-                    currentBitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), filePath);
+                    currentBitmap = MediaStore.Images.Media.getBitmap(Objects.requireNonNull(getActivity()).getContentResolver(), filePath);
                     int positionToUpdate = findPositionById(currentKeyItemImage);
-                    if (positionToUpdate != error_not_found){
+                    if (positionToUpdate != error_not_found) {
                         myDataset.get(positionToUpdate).setBitmap(currentBitmap);
                         mAdapter.notifyDataSetChanged();
                     }
@@ -421,7 +355,6 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         }
 
     }//onActivityResult
-
 
     /**
      * find element position by id
@@ -441,67 +374,22 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     @Override
     public void onStart() {
         super.onStart();
-
-        ValueEventListener valueEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                myDataset.clear();
-                for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren()) {
-                    Item item = new Item();
-                    item.setKey(childDataSnapshot.getKey());
-                    item.setName((String) childDataSnapshot.child("name").getValue());
-                    item.setImage((Boolean) childDataSnapshot.child("image").getValue());
-                    item.setUnit((String) childDataSnapshot.child("unit").getValue());
-                    if (childDataSnapshot.child("quantity").getValue() != null) {
-                        item.setQuantity(((Long) childDataSnapshot.child("quantity").getValue()).intValue());
-                    }
-                    item.setImageUrl((String) childDataSnapshot.child("imageUrl").getValue());
-                    item.setRejected((Boolean) childDataSnapshot.child("rejected").getValue());
-                    item.setChecked((Boolean) childDataSnapshot.child("checked").getValue());
-                    if (currentKeyItemImage != null){
-                        if (item.getKey().endsWith(currentKeyItemImage)){
-                            item.setBitmap(currentBitmap);
-                        }
-                    }
-
-                    myDataset.add(item);
-
-                }
-                listStructure.setItems(myDataset);
-
-                if (isFavorite(listStructure.getId())){
-                    databaseHelper.favoriteList(listStructure, getContext());
-                    updateWidget();
-                }
-                mAdapter.notifyDataSetChanged();
-                updateProgressBar();
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        };
-        mDatabaseReference.addValueEventListener(valueEventListener);
-        mValueEventListener = valueEventListener;
-
+        addDBListener();
     }
 
     private void updateProgressBar() {
         int count = 0;
-        for (Item item: myDataset){
-            if (item.isChecked()){
-                count ++;
+        for (Item item : myDataset) {
+            if (item.isChecked()) {
+                count++;
             }
         }
-        int totalChecks=myDataset.size();
+        int totalChecks = myDataset.size();
         double total = 0;
         if (totalChecks != 0) {
-            total =  (((double) count / (double) totalChecks) * 100);
+            total = (((double) count / (double) totalChecks) * 100);
         }
-       progressBar.setProgress((int)Math.ceil(total));
-
+        progressBar.setProgress((int) Math.ceil(total));
 
 
     }
@@ -509,10 +397,7 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     @Override
     public void onStop() {
         super.onStop();
-        if (mValueEventListener != null){
-            mDatabaseReference.removeEventListener(mValueEventListener);
-        }
-
+        removeDBListener();
     }
 
     //this method will upload the file
@@ -523,47 +408,44 @@ public class NewListFragment extends Fragment implements PreviewListListener {
             int index = filePath.toString().lastIndexOf("\\");
             String fileName = filePath.toString().substring(index + 1);
             progressDialog = new ProgressDialog(getActivity());
-            progressDialog.setTitle("Uploading");
+            progressDialog.setTitle(getString(R.string.uploading_image));
             progressDialog.show();
 
-            final StorageReference riversRef = storageReference.child("images/"+fileName);
+            final StorageReference riversRef = storageReference.child("images/" + fileName);
             UploadTask uploadTask = riversRef.putFile(filePath);
             isTaskRunning = true;
 
-            uploadTask
-                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            progressDialog.dismiss();
-                            isTaskRunning = false;
-                            Toast.makeText(getContext(), "File Uploaded ", Toast.LENGTH_LONG).show();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            progressDialog.dismiss();
-                            isTaskRunning = false;
-                            Toast.makeText(getContext(), exception.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                    })
-                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                            //calculating progress percentage
-                            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    progressDialog.dismiss();
+                    isTaskRunning = false;
+                    Toast.makeText(getContext(), getString(R.string.uploaded_image), Toast.LENGTH_LONG).show();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    progressDialog.dismiss();
+                    isTaskRunning = false;
+                    Toast.makeText(getContext(), getString(R.string.uploaded_image_error), Toast.LENGTH_LONG).show();
+                }
+            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                    //calculating progress percentage
+                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
 
-                            //displaying percentage in progress dialog
-                            progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
-                        }
-                    });
+                    //displaying percentage in progress dialog
+                    progressDialog.setMessage(getString(R.string.uploaded_image) + ": " + ((int) progress) + "%...");
+                }
+            });
 
 
             Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                 @Override
                 public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
                     if (!task.isSuccessful()) {
-                        throw task.getException();
+                        throw Objects.requireNonNull(task.getException());
                     }
 
                     // Continue with the task to get the download URL
@@ -592,11 +474,10 @@ public class NewListFragment extends Fragment implements PreviewListListener {
             });
 
 
-
         }
         //if there is not any file
         else {
-            //you can display an error toast
+            Toast.makeText(getContext(), getString(R.string.uploaded_image_error), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -604,7 +485,7 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (isTaskRunning) {
-            progressDialog = ProgressDialog.show(getActivity(), "Loading", "Please wait a moment!");
+            progressDialog = ProgressDialog.show(getActivity(), getString(R.string.login_progress_loading), getString(R.string.login_progress_loading));
         }
     }
 
@@ -612,12 +493,78 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         Utils.updateWidget(getContext());
     }
 
-    private boolean isFavorite(String id){
+    private boolean isFavorite(String id) {
         try {
             return Utils.isFavorite(getContext(), id);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <mValueEventListener href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</mValueEventListener> for more information.
+     */
+    public interface OnFragmentInteractionListener {
+        String getList();
+    }
+
+    private void addDBListener(){
+        ValueEventListener valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                myDataset.clear();
+                for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren()) {
+                    Item item = new Item();
+                    item.setKey(childDataSnapshot.getKey());
+                    item.setName((String) childDataSnapshot.child("name").getValue());
+                    item.setImage((Boolean) childDataSnapshot.child("image").getValue());
+                    item.setUnit((String) childDataSnapshot.child("unit").getValue());
+                    if (childDataSnapshot.child("quantity").getValue() != null) {
+                        item.setQuantity(((Long) Objects.requireNonNull(childDataSnapshot.child("quantity").getValue())).intValue());
+                    }
+                    item.setImageUrl((String) childDataSnapshot.child("imageUrl").getValue());
+                    item.setRejected((Boolean) childDataSnapshot.child("rejected").getValue());
+                    item.setChecked((Boolean) childDataSnapshot.child("checked").getValue());
+                    if (currentKeyItemImage != null) {
+                        if (item.getKey().endsWith(currentKeyItemImage)) {
+                            item.setBitmap(currentBitmap);
+                        }
+                    }
+
+                    myDataset.add(item);
+
+                }
+                listStructure.setItems(myDataset);
+
+                if (isFavorite(listStructure.getId())) {
+                    databaseHelper.favoriteList(listStructure, getContext());
+                    updateWidget();
+                }
+                mAdapter.notifyDataSetChanged();
+                updateProgressBar();
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+        mDatabaseReference.addValueEventListener(valueEventListener);
+        mValueEventListener = valueEventListener;
+    }
+
+    private void removeDBListener(){
+        if (mValueEventListener != null) {
+            mDatabaseReference.removeEventListener(mValueEventListener);
+        }
     }
 }

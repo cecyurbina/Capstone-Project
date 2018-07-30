@@ -3,7 +3,6 @@ package com.udacity.surbi.listnow.fragment;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.text.Editable;
@@ -91,7 +90,6 @@ public class NewItemFragment extends Fragment {
 
 
     public interface OnNewItemFragmentInteractionListener {
-        // TODO: Update argument type and name
         String getListKey();
 
         boolean isEdition();
