@@ -15,20 +15,19 @@ import com.udacity.surbi.listnow.activity.MainActivity;
  * Implementation of App Widget functionality.
  */
 public class AppWidget extends AppWidgetProvider {
-    public static String EXTRA_WORD=
-            "com.commonsware.android.appwidget.lorem.WORD";
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId) {
+    public static String EXTRA_WORD = "com.commonsware.android.appwidget.lorem.WORD";
+
+    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
 
         CharSequence widgetText = context.getString(R.string.appwidget_text);
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.app_widget);
         views.setTextViewText(R.id.appwidget_text, widgetText);
 
-        Intent clickIntent=new Intent(context, MainActivity.class);
-        PendingIntent clickPI=PendingIntent.getActivity(context, 0, clickIntent, 0);
+        Intent clickIntent = new Intent(context, MainActivity.class);
+        PendingIntent clickPI = PendingIntent.getActivity(context, 0, clickIntent, 0);
         views.setOnClickPendingIntent(R.id.ll_widget, clickPI);
 
-        Intent svcIntent=new Intent(context, WidgetService.class);
+        Intent svcIntent = new Intent(context, WidgetService.class);
         views.setRemoteAdapter(R.id.lv_list, svcIntent);
 
         appWidgetManager.updateAppWidget(appWidgetId, views);
@@ -42,8 +41,8 @@ public class AppWidget extends AppWidgetProvider {
         }
     }
 
-    public static void updateIngredients(Context context, AppWidgetManager appWidgetManager, int [] appWidgetsIds){
-        for (int appWidgetId: appWidgetsIds){
+    public static void updateIngredients(Context context, AppWidgetManager appWidgetManager, int[] appWidgetsIds) {
+        for (int appWidgetId : appWidgetsIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);
         }
 

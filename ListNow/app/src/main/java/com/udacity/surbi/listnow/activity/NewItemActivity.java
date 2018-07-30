@@ -11,6 +11,8 @@ import com.udacity.surbi.listnow.R;
 import com.udacity.surbi.listnow.fragment.NewItemFragment;
 import com.udacity.surbi.listnow.fragment.NewListFragment;
 
+import java.util.Objects;
+
 public class NewItemActivity extends AppCompatActivity implements NewItemFragment.OnNewItemFragmentInteractionListener {
     private String key;
     private String itemToEditString;
@@ -26,9 +28,9 @@ public class NewItemActivity extends AppCompatActivity implements NewItemFragmen
             itemToEditString = b.getString(NewListFragment.KEY_ITEM, "");
         }
         setContentView(R.layout.activity_new_item);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
     }
 
@@ -51,7 +53,7 @@ public class NewItemActivity extends AppCompatActivity implements NewItemFragmen
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             Intent intent = NavUtils.getParentActivityIntent(this);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            Objects.requireNonNull(intent).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             NavUtils.navigateUpTo(this, intent);
             return true;
         }

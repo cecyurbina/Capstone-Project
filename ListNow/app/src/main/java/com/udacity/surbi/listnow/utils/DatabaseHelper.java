@@ -1,18 +1,15 @@
 package com.udacity.surbi.listnow.utils;
 
 import android.content.Context;
-import android.provider.ContactsContract;
 
-import com.google.android.gms.common.util.Strings;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.udacity.surbi.listnow.data.Item;
 import com.udacity.surbi.listnow.data.ListStructure;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 public class DatabaseHelper {
     private DatabaseReference mDatabase;
@@ -23,6 +20,7 @@ public class DatabaseHelper {
 
     /**
      * CREATE LIST
+     *
      * @return id
      */
     public ListStructure createList(String userId) {
@@ -35,7 +33,7 @@ public class DatabaseHelper {
         List<String> users = new ArrayList<>();
         users.add(userId);
         listStructure.setUsers(users);
-        mDatabase.child("lists").child(key).setValue(listStructure);
+        mDatabase.child("lists").child(Objects.requireNonNull(key)).setValue(listStructure);
         return listStructure;
     }
 
@@ -53,7 +51,7 @@ public class DatabaseHelper {
 
     public void favoriteList(ListStructure item, Context context) {
         //mDatabase.child("lists").child(key).child("favorite").setValue(isFav);
-        Utils.saveIngredients(context, item);
+        Utils.saveList(context, item);
     }
 
     public ListStructure copyList(ListStructure listStructure, String userId) {
@@ -67,7 +65,7 @@ public class DatabaseHelper {
             user.add(userId);
             newList.setUsers(user);
             newList.setDataSnapshot(null);
-            mDatabase.child("lists").child(key).setValue(newList);
+            mDatabase.child("lists").child(Objects.requireNonNull(key)).setValue(newList);
 
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
@@ -77,19 +75,21 @@ public class DatabaseHelper {
 
     /**
      * ADD ITEM
+     *
      * @param idList list id
-     * @param item item
+     * @param item   item
      */
     public void addItemToList(String idList, Item item) {
         String key = mDatabase.child("items").push().getKey();
         item.setKey(key);
-        mDatabase.child("lists").child(idList).child("items").child(key).setValue(item);
+        mDatabase.child("lists").child(idList).child("items").child(Objects.requireNonNull(key)).setValue(item);
     }
 
     /**
      * UPDATE ITEM
+     *
      * @param idList list id
-     * @param item item
+     * @param item   item
      */
     public void updateItem(String idList, Item item) {
         mDatabase.child("lists").child(idList).child("items").child(item.getKey()).setValue(item);
@@ -97,6 +97,7 @@ public class DatabaseHelper {
 
     /**
      * REMOVE ITEM
+     *
      * @param idList list id
      * @param idItem item id
      */
@@ -106,6 +107,7 @@ public class DatabaseHelper {
 
     /**
      * REJECT ITEM
+     *
      * @param idList list id
      * @param idItem item id
      */

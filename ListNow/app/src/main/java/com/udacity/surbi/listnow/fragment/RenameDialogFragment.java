@@ -12,6 +12,8 @@ import android.widget.FrameLayout;
 
 import com.udacity.surbi.listnow.R;
 
+import java.util.Objects;
+
 
 public class RenameDialogFragment extends DialogFragment {
     private static final String KEY_TITLE = "title";
@@ -55,7 +57,7 @@ public class RenameDialogFragment extends DialogFragment {
         if (newName != null) {
             etNewName.setText(newName);
         }
-        FrameLayout container = new FrameLayout(getContext());
+        FrameLayout container = new FrameLayout(Objects.requireNonNull(getContext()));
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMarginStart(getResources().getDimensionPixelSize(R.dimen.dialog_margin));
         params.setMarginEnd(getResources().getDimensionPixelSize(R.dimen.dialog_margin));

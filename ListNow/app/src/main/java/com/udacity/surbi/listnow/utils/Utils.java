@@ -19,19 +19,18 @@ import java.util.List;
 
 public class Utils {
     public static final String BASE_URL = "https://google.com";
-    private static final String KEY_INGREDIENTS = "key_ingredients";
+    private static final String KEY_ITEMS = "key_items";
 
 
-
-    public static List<Item> getIngredients(Context context) throws IOException {
+    public static List<Item> getItemsList(Context context) throws IOException {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        String json = prefs.getString(KEY_INGREDIENTS, null);
+        String json = prefs.getString(KEY_ITEMS, null);
 
         if (json != null) {
             ObjectMapper mapper = new ObjectMapper();
             ListStructure user = new ListStructure();
             user = mapper.readValue(json, ListStructure.class);
-            return ((user.getItems().size() > 0)? user.getItems() : new ArrayList<Item>());
+            return ((user.getItems().size() > 0) ? user.getItems() : new ArrayList<Item>());
         } else {
             return new ArrayList<>();
         }
@@ -40,7 +39,7 @@ public class Utils {
 
     public static boolean isFavorite(Context context, String id) throws IOException {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        String json = prefs.getString(KEY_INGREDIENTS, null);
+        String json = prefs.getString(KEY_ITEMS, null);
 
         if (json != null) {
             ObjectMapper mapper = new ObjectMapper();
@@ -53,7 +52,7 @@ public class Utils {
 
     }
 
-    public static void saveIngredients(Context context, ListStructure ingredients){
+    public static void saveList(Context context, ListStructure ingredients) {
         ObjectMapper mapper = new ObjectMapper();
         //Object to JSON in String
         String jsonInString = null;
@@ -64,7 +63,7 @@ public class Utils {
         }
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(KEY_INGREDIENTS, jsonInString);
+        editor.putString(KEY_ITEMS, jsonInString);
         editor.apply();
     }
 

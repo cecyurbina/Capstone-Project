@@ -19,7 +19,7 @@ public class Owner {
     @JsonProperty("ownerName")
     private String ownerName;
     @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private Map<String, Object> additionalProperties = new HashMap<>();
 
     @JsonProperty("ownerId")
     public String getOwnerId() {

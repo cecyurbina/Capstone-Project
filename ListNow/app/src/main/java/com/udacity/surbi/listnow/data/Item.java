@@ -42,7 +42,7 @@ public class Item {
     @JsonIgnore
     private Bitmap bitmap;
     @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private Map<String, Object> additionalProperties = new HashMap<>();
 
     @JsonProperty("key")
     public String getKey() {

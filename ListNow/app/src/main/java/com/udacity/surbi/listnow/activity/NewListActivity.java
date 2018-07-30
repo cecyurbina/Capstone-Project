@@ -11,6 +11,8 @@ import com.udacity.surbi.listnow.R;
 import com.udacity.surbi.listnow.fragment.ListHomeFragment;
 import com.udacity.surbi.listnow.fragment.NewListFragment;
 
+import java.util.Objects;
+
 public class NewListActivity extends AppCompatActivity implements NewListFragment.OnFragmentInteractionListener {
     private String jsonList = null;
 
@@ -21,10 +23,10 @@ public class NewListActivity extends AppCompatActivity implements NewListFragmen
         jsonList = intent.getStringExtra(ListHomeFragment.KEY_LIST_JSON);
 
         setContentView(R.layout.activity_new_list);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -36,7 +38,7 @@ public class NewListActivity extends AppCompatActivity implements NewListFragmen
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             Intent intent = NavUtils.getParentActivityIntent(this);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            Objects.requireNonNull(intent).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             NavUtils.navigateUpTo(this, intent);
             return true;
         }

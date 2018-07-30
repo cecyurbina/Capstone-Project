@@ -14,14 +14,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IngredientsList implements RemoteViewsService.RemoteViewsFactory {
+public class SimpleList implements RemoteViewsService.RemoteViewsFactory {
     private List<Item> items = new ArrayList<>();
     private Context ctxt;
 
-    public IngredientsList(Context ctxt, Intent intent) {
+    public SimpleList(Context ctxt, Intent intent) {
         this.ctxt = ctxt;
         try {
-            items = Utils.getIngredients(ctxt);
+            items = Utils.getItemsList(ctxt);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -42,9 +42,8 @@ public class IngredientsList implements RemoteViewsService.RemoteViewsFactory {
 
     @Override
     public RemoteViews getViewAt(int position) {
-        RemoteViews row = new RemoteViews(ctxt.getPackageName(),
-                R.layout.item_ingredient);
-        row.setTextViewText(R.id.tv_ingredient, items.get(position).getName());
+        RemoteViews row = new RemoteViews(ctxt.getPackageName(), R.layout.item_list_widget);
+        row.setTextViewText(R.id.tv_name_list, items.get(position).getName());
         if (items.get(position).isChecked()) {
             row.setViewVisibility(R.id.iv_check, View.VISIBLE);
         } else {
@@ -76,7 +75,7 @@ public class IngredientsList implements RemoteViewsService.RemoteViewsFactory {
     @Override
     public void onDataSetChanged() {
         try {
-            items = Utils.getIngredients(ctxt);
+            items = Utils.getItemsList(ctxt);
         } catch (IOException e) {
             e.printStackTrace();
         }
