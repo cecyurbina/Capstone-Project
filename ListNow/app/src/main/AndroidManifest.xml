@@ -3,6 +3,7 @@
     package="com.udacity.surbi.listnow">
 
     <application
+        android:name=".ListNow"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/ic_launcher"
