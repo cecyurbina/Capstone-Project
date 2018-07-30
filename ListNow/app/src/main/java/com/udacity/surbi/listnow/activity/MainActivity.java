@@ -1,5 +1,6 @@
 package com.udacity.surbi.listnow.activity;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -127,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void createList() {
         Intent intent = new Intent(getApplicationContext(), NewListActivity.class);
-        startActivity(intent);
+        startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
     }
 
     /**

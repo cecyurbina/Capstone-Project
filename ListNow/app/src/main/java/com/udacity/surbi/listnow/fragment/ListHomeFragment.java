@@ -1,5 +1,6 @@
 package com.udacity.surbi.listnow.fragment;
 
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -131,7 +132,7 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
             String jsonList = getJsonList(itemList);
             Intent intent = new Intent(getContext(), NewListActivity.class);
             intent.putExtra(KEY_LIST_JSON, jsonList);
-            startActivity(intent);
+            startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

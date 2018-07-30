@@ -1,6 +1,7 @@
 package com.udacity.surbi.listnow.fragment;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -165,7 +166,7 @@ public class NewListFragment extends Fragment implements PreviewListListener {
                 Intent intent = new Intent(getContext(), NewItemActivity.class);
                 intent.putExtra(KEY_LIST_ID, key);
                 intent.putExtra(KEY_EDITION, false);
-                startActivityForResult(intent, CODE_RESULT_NEW);
+                startActivityForResult(intent, CODE_RESULT_NEW,  ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle());
             }
         });
 
@@ -269,7 +270,7 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         intent.putExtra(KEY_LIST_ID, key);
         intent.putExtra(KEY_EDITION, true);
         intent.putExtra(KEY_ITEM, jsonInString);
-        startActivityForResult(intent, CODE_RESULT_EDIT);
+        startActivityForResult(intent, CODE_RESULT_EDIT,  ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle());
     }
 
     private void onListDeleteClicked(Item item) {
