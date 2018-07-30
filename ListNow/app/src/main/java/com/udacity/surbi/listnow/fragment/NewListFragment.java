@@ -309,7 +309,7 @@ public class NewListFragment extends Fragment implements PreviewListListener {
                     e.printStackTrace();
                 }
                 if (resultCode == RESULT_OK) {
-                    myDataset.add(obj);
+                    //myDataset.add(obj);
                     showData();
                     mAdapter.notifyDataSetChanged();
                 }
@@ -374,6 +374,7 @@ public class NewListFragment extends Fragment implements PreviewListListener {
     public void onStart() {
         super.onStart();
         addDBListener();
+        showData();
     }
 
     private void updateProgressBar() {
