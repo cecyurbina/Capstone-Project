@@ -1,5 +1,7 @@
 package com.udacity.surbi.listnow.fragment;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -31,6 +33,7 @@ import com.udacity.surbi.listnow.adapter.ListAdapter;
 import com.udacity.surbi.listnow.data.Item;
 import com.udacity.surbi.listnow.data.ListStructure;
 import com.udacity.surbi.listnow.utils.DatabaseHelper;
+import com.udacity.surbi.listnow.widget.AppWidget;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -263,13 +266,10 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     }
 
     private void onFavoriteMenuClicked(ListStructure itemList) {
-        int position = findPositionById(itemList.getId());
-        if (position != error_not_found) {
-            ListStructure item = myDataset.get(position);
-            mDatabaseHelper.favoriteList(itemList.getId(), !item.getFavorite());
-            myDataset.get(position).setFavorite(!item.getFavorite());
-            mAdapter.notifyDataSetChanged();
-        }
+        setItemsOnList(itemList);
+        mDatabaseHelper.favoriteList(itemList, getContext());
+        updateWidget();
+
     }
 
     private void onDeleteMenuClicked(ListStructure itemList) {
@@ -312,19 +312,21 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 myDataset.clear();
-                for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren()) {
-                    ListStructure listStructure = new ListStructure();
-                    listStructure.setId(childDataSnapshot.getKey());
-                    listStructure.setName((String) childDataSnapshot.child("name").getValue());
-                    listStructure.setCompleted((Boolean) childDataSnapshot.child("completed").getValue());
-                    listStructure.setFavorite((Boolean) childDataSnapshot.child("favorite").getValue());
-                    listStructure.setDataSnapshot(childDataSnapshot.child("items"));
-                    DataSnapshot usersData = childDataSnapshot.child("users");
-                    for (DataSnapshot userData: usersData.getChildren()){
-                        String tempUser = (String) userData.getValue();
-                        if (tempUser.equals(currentUser.getUid())){
-                            myDataset.add(listStructure);
-                            break;
+                if (currentUser != null) {
+                    for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren()) {
+                        ListStructure listStructure = new ListStructure();
+                        listStructure.setId(childDataSnapshot.getKey());
+                        listStructure.setName((String) childDataSnapshot.child("name").getValue());
+                        listStructure.setCompleted((Boolean) childDataSnapshot.child("completed").getValue());
+                        listStructure.setFavorite((Boolean) childDataSnapshot.child("favorite").getValue());
+                        listStructure.setDataSnapshot(childDataSnapshot.child("items"));
+                        DataSnapshot usersData = childDataSnapshot.child("users");
+                        for (DataSnapshot userData : usersData.getChildren()) {
+                            String tempUser = (String) userData.getValue();
+                            if (tempUser.equals(currentUser.getUid())) {
+                                myDataset.add(listStructure);
+                                break;
+                            }
                         }
                     }
                 }
@@ -377,4 +379,11 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
         alertDialog.show(fm, "fragment_alert");
     }
 
+    private void updateWidget() {
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(getContext());
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(getContext(), AppWidget.class));
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.lv_list);
+
+        AppWidget.updateIngredients(getContext(), appWidgetManager, appWidgetIds);
+    }
 }

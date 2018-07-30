@@ -1,5 +1,6 @@
 package com.udacity.surbi.listnow.utils;
 
+import android.content.Context;
 import android.provider.ContactsContract;
 
 import com.google.android.gms.common.util.Strings;
@@ -50,8 +51,9 @@ public class DatabaseHelper {
         mDatabase.child("lists").child(key).child("completed").setValue(isCompleted);
     }
 
-    public void favoriteList(String key, boolean isFav) {
-        mDatabase.child("lists").child(key).child("favorite").setValue(isFav);
+    public void favoriteList(ListStructure item, Context context) {
+        //mDatabase.child("lists").child(key).child("favorite").setValue(isFav);
+        Utils.saveIngredients(context, item);
     }
 
     public ListStructure copyList(ListStructure listStructure) {

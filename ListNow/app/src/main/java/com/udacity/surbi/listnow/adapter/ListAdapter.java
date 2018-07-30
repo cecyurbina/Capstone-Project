@@ -77,7 +77,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             }
         });
 
-        holder.ivFav.setVisibility((currentItem.getFavorite()) ? View.VISIBLE : View.GONE);
+        holder.ivFav.setVisibility(View.GONE);
     }
 
     @Override
