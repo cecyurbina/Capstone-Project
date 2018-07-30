@@ -50,6 +50,7 @@ import com.udacity.surbi.listnow.adapter.PreviewListListener;
 import com.udacity.surbi.listnow.data.Item;
 import com.udacity.surbi.listnow.data.ListStructure;
 import com.udacity.surbi.listnow.utils.DatabaseHelper;
+import com.udacity.surbi.listnow.utils.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -464,9 +465,17 @@ public class NewListFragment extends Fragment implements PreviewListListener {
                     }
 
                     myDataset.add(item);
+
+                }
+                listStructure.setItems(myDataset);
+
+                if (isFavorite(listStructure.getId())){
+                    databaseHelper.favoriteList(listStructure, getContext());
+                    updateWidget();
                 }
                 mAdapter.notifyDataSetChanged();
                 updateProgressBar();
+
             }
 
             @Override
@@ -599,4 +608,16 @@ public class NewListFragment extends Fragment implements PreviewListListener {
         }
     }
 
+    private void updateWidget() {
+        Utils.updateWidget(getContext());
+    }
+
+    private boolean isFavorite(String id){
+        try {
+            return Utils.isFavorite(getContext(), id);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

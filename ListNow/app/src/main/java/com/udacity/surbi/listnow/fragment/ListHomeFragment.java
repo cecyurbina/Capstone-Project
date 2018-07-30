@@ -33,6 +33,7 @@ import com.udacity.surbi.listnow.adapter.ListAdapter;
 import com.udacity.surbi.listnow.data.Item;
 import com.udacity.surbi.listnow.data.ListStructure;
 import com.udacity.surbi.listnow.utils.DatabaseHelper;
+import com.udacity.surbi.listnow.utils.Utils;
 import com.udacity.surbi.listnow.widget.AppWidget;
 
 import java.io.IOException;
@@ -234,7 +235,7 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
 
     private void onCopyMenuClicked(ListStructure itemList, boolean isEmpty) {
         setItemsOnList(itemList);
-        myDataset.add(mDatabaseHelper.copyList(itemList));
+        myDataset.add(mDatabaseHelper.copyList(itemList, currentUser.getUid()));
         mAdapter.notifyDataSetChanged();
     }
 
@@ -380,10 +381,6 @@ public class ListHomeFragment extends Fragment implements ListAdapter.OnItemSele
     }
 
     private void updateWidget() {
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(getContext());
-        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(getContext(), AppWidget.class));
-        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.lv_list);
-
-        AppWidget.updateIngredients(getContext(), appWidgetManager, appWidgetIds);
+        Utils.updateWidget(getContext());
     }
 }

@@ -56,13 +56,16 @@ public class DatabaseHelper {
         Utils.saveIngredients(context, item);
     }
 
-    public ListStructure copyList(ListStructure listStructure) {
+    public ListStructure copyList(ListStructure listStructure, String userId) {
         ListStructure newList = new ListStructure();
         try {
             newList = (ListStructure) listStructure.clone();
             String key = mDatabase.child("lists").push().getKey();
             newList.setId(key);
             newList.setName(listStructure.getName() + " Copy");
+            List<String> user = new ArrayList<>();
+            user.add(userId);
+            newList.setUsers(user);
             newList.setDataSnapshot(null);
             mDatabase.child("lists").child(key).setValue(newList);
 
