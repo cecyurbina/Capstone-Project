@@ -43,6 +43,7 @@
         android:layout_margin="5dp"
         android:paddingEnd="2dp"
         android:paddingStart="2dp"
+        android:contentDescription="@string/uncheck_item"
         android:text="@string/new_item_image_required"
         android:textSize="18sp" />
 

@@ -62,7 +62,8 @@
         android:padding="3dp"
         android:src="@drawable/ic_launcher_background"
         app:layout_constraintStart_toStartOf="@+id/tv_name"
-        app:layout_constraintTop_toBottomOf="@+id/barrier2" />
+        app:layout_constraintTop_toBottomOf="@+id/barrier2"
+        android:contentDescription="@string/button_upload_image" />
 
     <TextView
         android:id="@+id/tv_reject"
@@ -83,6 +84,7 @@
         android:layout_marginTop="8dp"
         android:scaleX="1.30"
         android:scaleY="1.30"
+        android:contentDescription="@string/uncheck_item"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"

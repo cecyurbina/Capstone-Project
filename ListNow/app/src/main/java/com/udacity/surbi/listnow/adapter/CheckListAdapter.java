@@ -102,6 +102,11 @@ public class CheckListAdapter extends RecyclerView.Adapter<CheckListAdapter.View
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 listener.onCheck(currentItem);
+                if (isChecked){
+                    holder.cbCheck.setContentDescription(holder.cbCheck.getContext().getString(R.string.check_item));
+                } else {
+                    holder.cbCheck.setContentDescription(holder.cbCheck.getContext().getString(R.string.uncheck_item));
+                }
             }
         });
 

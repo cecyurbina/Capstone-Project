@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
 
@@ -74,6 +75,15 @@ public class NewItemFragment extends Fragment {
             @Override
             public void afterTextChanged(Editable s) {
 
+            }
+        });
+        switchImage.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked){
+                    switchImage.setContentDescription(getString(R.string.check_item));
+                } else {
+                    switchImage.setContentDescription(getString(R.string.uncheck_item));
+                }
             }
         });
         if (listener.isEdition()) {
