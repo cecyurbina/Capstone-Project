@@ -85,6 +85,11 @@ public class CheckListAdapter extends RecyclerView.Adapter<CheckListAdapter.View
         holder.cbCheck.setOnCheckedChangeListener(null);
         if (currentItem.isChecked() != null) {
             holder.cbCheck.setChecked(currentItem.isChecked());
+            if (currentItem.isChecked()){
+                holder.cbCheck.setContentDescription(holder.cbCheck.getContext().getString(R.string.check_item));
+            } else {
+                holder.cbCheck.setContentDescription(holder.cbCheck.getContext().getString(R.string.uncheck_item));
+            }
         } else {
             holder.cbCheck.setChecked(false);
         }
